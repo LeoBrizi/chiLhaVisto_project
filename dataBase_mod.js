@@ -2,46 +2,13 @@
 modulo per gestire l'interazione con un data base
 */
 
-/*
-classe per identificare il gestore del data base non relazionale
-*/
-class gestoreDataBase{
-    constructor(ip, porta){
-        this.ip = ip;
-        this.porta = porta;
-    }
-};
+var post = require("./post");
 
-/*
-classe per identificare il data base
-*/
-class dataBase{
-    constructor(nome){
-        this.nome = nome;
-    }
-};
-
-/*
-classe per identificare un post
-*/
-class post{
-    constructor(tipoPost,categoria,sottoCategoria,immagine,data,luogo,riconpensa,descrizione){
-        this.tipoPost = tipoPost; 
-        this.categoria = categoria;
-        this.sottoCategoria = sottoCategoria;
-        this.immagine = immagine;
-        this.data = data;
-        this.luogo = luogo;
-        this.riconpensa = riconpensa;
-        this.descrizione = descrizione;
-    }
-};
-
-var gestoreDataBase;
+var gestoreDB;
 
 //funzione per aggiungere un nuovo post al data base
 var aggiungiPost = function(dataBase,post){
-
+    console.log(gestoreDB);
 }
 //funzione per rimuovere un post da un data base
 var rimuoviPost = function(dataBase,post){
@@ -60,11 +27,14 @@ var cerca = function(dataBase,postDiPartenza){
 
 }
 
+var init = function(ip,porta){
+    gestoreDB = [ip,porta];
+}
+
 exports.aggiungiPost = aggiungiPost;
 exports.rimuoviPost = rimuoviPost;
 exports.creaDataBase = creaDataBase;
 exports.eliminaDataBase = eliminaDataBase;
 exports.cerca = cerca;
-module.exports = (ip,porta) => {
-    gestoreDataBase = gestoreDataBase(ip,porta);
-};
+exports.init = init;
+
