@@ -1,5 +1,5 @@
 /*
-main dell'applicazione, gestore delle chiamate http che implentano la logica REST
+main dell'applicazione, fa il set up del server
 */
 const costanti = require("./costanti.json");
 var db = require("./dataBase_mod");
@@ -9,6 +9,9 @@ var post = require("./post");
 var express = require("express");
 var app = express();
 var port = process.env.PORT || costanti.defaultPort;
+
+var routes = require('./app/routes');   //importa routes, gestore delle chiamate REST
+routes(app);
 
 app.listen(port,function(){
     p = new post.Post(2,2,2,2,2,2,2,2);
