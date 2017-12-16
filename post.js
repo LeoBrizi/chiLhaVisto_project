@@ -1,3 +1,4 @@
+
 function Post(tipoPost,categoria,sottoCategoria,immagine,data,luogo,ricompensa,descrizione){
     this.tipoPost = tipoPost;
     this.categoria = categoria;

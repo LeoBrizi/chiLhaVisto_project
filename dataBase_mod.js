@@ -9,6 +9,7 @@ var gestoreDB;
 //funzione per aggiungere un nuovo post al data base
 var aggiungiPost = function(dataBase,post){
     console.log(gestoreDB);
+    console.log("classe post funziona nel modulo del database"+post.toString());
 }
 //funzione per rimuovere un post da un data base
 var rimuoviPost = function(dataBase,post){

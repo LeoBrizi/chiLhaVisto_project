@@ -2,17 +2,17 @@
   "name": "chilhavisto",
   "version": "1.0.0",
   "description": "web application for lost property",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm install && node index.js"
+    "start": "npm install && node server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LeoBrizi/chiLhaVisto_project.git"
   },
   "author": "EleonoraChiarantano, AriannaGavioli, LeonardoBrizi",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/LeoBrizi/chiLhaVisto_project/issues"
   },
