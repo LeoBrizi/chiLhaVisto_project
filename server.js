@@ -10,7 +10,7 @@ var express = require("express");
 var app = express();
 var port = process.env.PORT || costanti.defaultPort;
 
-var routes = require('./app/routes');   //importa routes, gestore delle chiamate REST
+var routes = require('./app/routes/routes');   //importa routes, gestore delle chiamate REST
 routes(app);
 
 app.listen(port,function(){
