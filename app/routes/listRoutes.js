@@ -1,16 +1,25 @@
 module.exports(app){
 	// var db = require(dataBase_mod.js);
 	// var oauthLogin = require(--);
+	var fs = require('fs');
 	
 	// PAGINA INIZIALE--------------------------------------------------
 	
-	app.get('/', function(req,res) {
-		//
+	app.get('/', function(req,res) {    //restituiamo index.html in views
+		fs.readFile('../../views/index.html', function(err,data){
+			 res.writeHead(200, {'Content-Type': 'text/html'});
+			 res.write(data);
+			 res.end();
+		});
 	});
 	
 	//LOGIN-------------------------------------------------------------
 	
-	app.get('/login', function(req,res) {
+	app.get('/loginfacebook', function(req,res) {
+		//
+	});
+	
+	app.get('/logingoogle', function(req,res) {
 		//
 	});
 	
