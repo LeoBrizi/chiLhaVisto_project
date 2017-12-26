@@ -1,4 +1,4 @@
-module.exports(app){
+module.exports = function(app){
 	// var db = require(dataBase_mod.js);
 	// var oauthLogin = require(--);
 	var fs = require('fs');
@@ -6,7 +6,7 @@ module.exports(app){
 	// PAGINA INIZIALE--------------------------------------------------
 	
 	app.get('/', function(req,res) {    //restituiamo index.html in views
-		fs.readFile('../../views/index.html', function(err,data){
+		fs.readFile('../../../views/index.html', function(err,data){
 			 res.writeHead(200, {'Content-Type': 'text/html'});
 			 res.write(data);
 			 res.end();
