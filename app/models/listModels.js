@@ -49,5 +49,5 @@ var UtenteSchema = new Schema({
 	
 });
 
-module.exports = mongoose.model('Post', PostSchema);
-module.exports = mongoose.model('Utente',UtenteSchema);
+module.exports.Post = mongoose.model('Post', PostSchema);
+module.exports.Utente = mongoose.model('Utente',UtenteSchema);
