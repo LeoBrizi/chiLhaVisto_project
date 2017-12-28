@@ -19,6 +19,8 @@
   "homepage": "https://github.com/LeoBrizi/chiLhaVisto_project#readme",
   "dependencies": {
     "consolidate": "^0.15.0",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "mongoose": "^4.13.8",
+    "passport": "^0.4.0"
   }
 }

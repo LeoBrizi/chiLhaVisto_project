@@ -8,6 +8,10 @@ var app = express();
 var port = process.env.PORT || costanti.defaultPort;
 var path = require("path");
 var engines = require('consolidate');
+var mongoose = require('mongoose');  //va configurato
+var passport = require('passport')
+
+app.use(bodyParser());
 
 app.use(express.static(path.join(__dirname,'views')));
 
