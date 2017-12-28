@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/LeoBrizi/chiLhaVisto_project#readme",
   "dependencies": {
+    "consolidate": "^0.15.0",
     "express": "^4.16.2"
   }
 }
