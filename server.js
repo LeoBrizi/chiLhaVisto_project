@@ -5,17 +5,23 @@ const costanti = require("./config/costanti.json");
 
 var express = require("express");
 var app = express();
+
 var port = process.env.PORT || costanti.defaultPort;
+
 var path = require("path");
-var engines = require('consolidate');
+
 var mongoose = require('mongoose');  //va configurato
-var passport = require('passport')
 
-app.use(bodyParser());
+var passport = require('passport');
 
-app.use(express.static(path.join(__dirname,'views')));
+const pug = require('pug');
 
-app.engine('html',engines.mustache); //per adesso usiamo questo i vorei utilizzare pug
+var bodyParser = require("body-parser"); //per parsare il body della post
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
+
+app.set('view engine', 'pug');
 
 var routes = require('./app/routes/listRoutes');   //importa routes, gestore delle chiamate http
 routes(app);
