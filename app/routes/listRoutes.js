@@ -1,4 +1,5 @@
-module.exports = function(app){
+
+module.exports = function(app, passport){
 
 	// PAGINA INIZIALE--------------------------------------------------
 	
@@ -20,12 +21,21 @@ module.exports = function(app){
 	//LOGOUT------------------------------------------------------------
 	
 	app.get('/logout', function(req,res) {
-		//
+		req.logout();		//disponibile da passport
+		res.redirect('/');
 	});
 	
+
 	//gestione del profilo utente
 	app.get('/profilo',function(req,res){
-
-	});
 	
+	});
+
 }
+
+function isLoggedIn(req,res,next){
+	
+	if(req.isAuthenticated())
+		return next();		// se l'utente è autenticato, la sessione può continuare
+		
+	res.redirect('/');		//altrimenti viene rediretto alla home page
