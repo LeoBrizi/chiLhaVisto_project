@@ -1,22 +1,28 @@
 /*
 main dell'applicazione, fa il set up del server
 */
-const costanti = require("./config/costanti.json");
+const costanti = require("./config/costanti");
 
 var express = require("express");
 var app = express();
+
 var port = process.env.PORT || costanti.defaultPort;
+
 var path = require("path");
-var engines = require('consolidate');
+
 var mongoose = require('mongoose');  //va configurato
+
 var passport = require('passport');
 var session = require('express-session');
 
-app.use(bodyParser());
+const pug = require('pug');
 
-app.use(express.static(path.join(__dirname,'views')));
+var bodyParser = require("body-parser"); //per parsare il body della post
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.engine('html',engines.mustache); //per adesso usiamo questo i vorei utilizzare pug
+
+
+app.set('view engine', 'pug');
 
 //PASSPORT SET-UP-------------------------------------------------------
 app.use(session({secret: 'itremoschettieri'}));		//per stabilire le sessioni con gli utenti

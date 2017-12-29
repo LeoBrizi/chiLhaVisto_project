@@ -1,18 +1,21 @@
+
 module.exports = function(app, passport){
-	// var db = require(dataBase_mod.js);
-	// var oauthLogin = require(--);
 
 	// PAGINA INIZIALE--------------------------------------------------
 	
-	app.get('/', function(req,res) {    //restituiamo index.html in views
-		res.render("index.html");
-		
+	app.get('/', function(req,res) {    
+		res.render('index');
 	});
 	
 	//LOGIN-------------------------------------------------------------
-	
-	app.get('/login', function(req,res) {
-		//
+
+	app.get('/login',function(req,res){
+		//res.render("login.html");
+		res.render("login");
+	});
+
+	app.post('/login',function(req,res){
+
 	});
 	
 	//PROFILO-----------------------------------------------------------
@@ -28,16 +31,12 @@ module.exports = function(app, passport){
 		res.redirect('/');
 	});
 	
-	//GESTIONE DEI POST-------------------------------------------------
+
+	//gestione del profilo utente
+	app.get('/profilo',function(req,res){
 	
-	app.get('/scrivipost', function(req,res) {
-		//l'utente viene indirizzato su una pagina con un form per compilare il post
 	});
-	
-	app.post('/scrivipost',function(req,res) {
-		//l'utente invia la form compilata del post
-	});
-	
+
 }
 
 function isLoggedIn(req,res,next){
