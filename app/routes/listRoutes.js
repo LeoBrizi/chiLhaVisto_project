@@ -30,12 +30,6 @@ module.exports = function(app, passport){
 		req.logout();		//disponibile da passport
 		res.redirect('/');
 	});
-	
-
-	//gestione del profilo utente
-	app.get('/profilo',function(req,res){
-	
-	});
 
 }
 
