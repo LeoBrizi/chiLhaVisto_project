@@ -20,7 +20,7 @@ module.exports = function(app, passport){
 	
 	//PROFILO-----------------------------------------------------------
 	
-	app.get('/profile',function(req,res)){
+	app.get('/profilo',isLoggedIn,function(req,res){
 		//
 	});
 	

@@ -29,6 +29,7 @@ app.use(session({secret: 'itremoschettieri'}));		//per stabilire le sessioni con
 app.use(passport.initialize());
 app.use(passport.session());	//invocato ad ogni richiesta: verifica se lo user è autenticato
 
+
 var routes = require('./app/routes/listRoutes');   //importa routes, gestore delle chiamate http
 routes(app,passport);
 
