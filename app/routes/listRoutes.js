@@ -39,3 +39,4 @@ function isLoggedIn(req,res,next){
 		return next();		// se l'utente è autenticato, la sessione può continuare
 		
 	res.redirect('/');		//altrimenti viene rediretto alla home page
+}

@@ -1,7 +1,7 @@
 /*
 main dell'applicazione, fa il set up del server
 */
-const costanti = require("./config/costanti.json");
+const costanti = require("./config/costanti");
 
 var express = require("express");
 var app = express();
