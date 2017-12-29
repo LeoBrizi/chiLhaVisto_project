@@ -21,7 +21,7 @@ app.engine('html',engines.mustache); //per adesso usiamo questo i vorei utilizza
 //PASSPORT SET-UP-------------------------------------------------------
 app.use(session({secret: 'itremoschettieri'}));		//per stabilire le sessioni con gli utenti
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session());	//invocato ad ogni richiesta: verifica se lo user è autenticato
 
 var routes = require('./app/routes/listRoutes');   //importa routes, gestore delle chiamate http
 routes(app,passport);

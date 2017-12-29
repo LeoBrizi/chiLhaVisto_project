@@ -11,15 +11,15 @@ module.exports = function(app, passport){
 	
 	//LOGIN-------------------------------------------------------------
 	
-	app.get('/loginfacebook', function(req,res) {
+	app.get('/login', function(req,res) {
 		//
 	});
 	
-	app.get('/logingoogle', function(req,res) {
+	//PROFILO-----------------------------------------------------------
+	
+	app.get('/profile',function(req,res)){
 		//
 	});
-	
-	// altri tipi di login qui
 	
 	//LOGOUT------------------------------------------------------------
 	
@@ -46,3 +46,4 @@ function isLoggedIn(req,res,next){
 		return next();		// se l'utente è autenticato, la sessione può continuare
 		
 	res.redirect('/');		//altrimenti viene rediretto alla home page
+}
