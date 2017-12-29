@@ -1,4 +1,4 @@
-module.exports = function(app){
+module.exports = function(app, passport){
 	// var db = require(dataBase_mod.js);
 	// var oauthLogin = require(--);
 
@@ -24,7 +24,8 @@ module.exports = function(app){
 	//LOGOUT------------------------------------------------------------
 	
 	app.get('/logout', function(req,res) {
-		//
+		req.logout();		//disponibile da passport
+		res.redirect('/');
 	});
 	
 	//GESTIONE DEI POST-------------------------------------------------
@@ -33,8 +34,15 @@ module.exports = function(app){
 		//l'utente viene indirizzato su una pagina con un form per compilare il post
 	});
 	
-	app.post('/scrivipost/invia',function(req,res) {
+	app.post('/scrivipost',function(req,res) {
 		//l'utente invia la form compilata del post
 	});
 	
 }
+
+function isLoggedIn(req,res,next){
+	
+	if(req.isAuthenticated())
+		return next();		// se l'utente è autenticato, la sessione può continuare
+		
+	res.redirect('/');		//altrimenti viene rediretto alla home page
