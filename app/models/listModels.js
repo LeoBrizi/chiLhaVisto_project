@@ -45,13 +45,6 @@ var UtenteSchema = new Schema({
         token        : String,
         name         : String,
         email        : String
-    },
-    
-    twitter          : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        username     : String
     }
 });
 

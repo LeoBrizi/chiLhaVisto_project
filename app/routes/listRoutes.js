@@ -1,5 +1,5 @@
 
-module.exports = function(app, passport){
+module.exports = function(app){
 
 	// PAGINA INIZIALE--------------------------------------------------
 	
@@ -19,7 +19,7 @@ module.exports = function(app, passport){
 	
 	//PROFILO-----------------------------------------------------------
 	
-	app.get('/profilo',isLoggedIn, function(req,res){
+	app.get('/profilo',function(req,res){
 		/*res.render('profilo', {
             user : req.user // passaggio dell'utente per mostrargli il proprio profilo
         });*/
@@ -34,10 +34,3 @@ module.exports = function(app, passport){
 
 }
 
-function isLoggedIn(req,res,next){
-	
-	if(req.isAuthenticated())
-		return next();		// se l'utente è autenticato, la sessione può continuare
-		
-	res.redirect('/');		//altrimenti viene rediretto alla home page
-}
