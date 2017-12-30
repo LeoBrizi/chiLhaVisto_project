@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.set('view engine', 'pug');
 
 var routes = require('./app/routes/listRoutes');   //importa routes, gestore delle chiamate http
-routes(app); //passati app e passport per essere usati in routes
+routes(app); //passata app per essere usata in routes
 
 //LANCIO SERVER-------------------------------------------------------
 app.listen(port,function(){

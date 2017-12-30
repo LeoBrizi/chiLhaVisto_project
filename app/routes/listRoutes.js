@@ -10,7 +10,6 @@ module.exports = function(app){
 	//LOGIN-------------------------------------------------------------
 
 	app.get('/login',function(req,res){
-		//res.render("login.html");
 		res.render("login");
 	});
 
@@ -21,7 +20,7 @@ module.exports = function(app){
 	//PROFILO-----------------------------------------------------------
 	
 	app.get('/profilo',isLoggedIn,function(req,res){
-		//
+		//da fare funzione che controlla se loggato o da eliminare isLoggedIn
 	});
 	
 	//LOGOUT------------------------------------------------------------
