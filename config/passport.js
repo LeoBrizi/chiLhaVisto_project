@@ -1,21 +1,16 @@
 
 var FBStrategy = require('passport-facebook').Strategy;		//usata per autenticarsi su facebook e gestire la callback
-var TwitterStrategy  = require('passport-twitter').Strategy;
 
-var user = require('../app/models/listModels').Utente;		//prendiamo il modello di utente del db
+var user = require('../app/models/Utente');					//prendiamo il modello di utente del db
 
-var configAuth = require('./auth'); //prendiamo le variabili auth
+var configAuth = require('./auth');
 
 module.exports = function(passport) {
-
-    //setup sessione (per sessioni persistenti)------------------------
-
-	//serializza l'utente per la sessione
+	
 	passport.serializeUser(function(user,done){
 		done(null,user.id);
 	});
 	
-    //deserializza l'utente
 	passport.deserializeUser(function(id,done){
 		User.findById(id,function(err,user){
 			done(err,user);
@@ -62,6 +57,5 @@ module.exports = function(passport) {
 					}
 				});
 			}));
-		};
 }
 
