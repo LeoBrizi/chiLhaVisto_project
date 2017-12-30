@@ -10,7 +10,6 @@ module.exports = function(app){
 	//LOGIN-------------------------------------------------------------
 
 	app.get('/login',function(req,res){
-		//res.render("login.html");
 		res.render("login");
 	});
 
