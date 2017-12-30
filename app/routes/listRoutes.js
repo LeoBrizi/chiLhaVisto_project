@@ -20,8 +20,10 @@ module.exports = function(app, passport){
 	
 	//PROFILO-----------------------------------------------------------
 	
-	app.get('/profilo',isLoggedIn,function(req,res){
-		//
+	app.get('/profilo',isLoggedIn, function(req,res){
+		/*res.render('profilo', {
+            user : req.user // passaggio dell'utente per mostrargli il proprio profilo
+        });*/
 	});
 	
 	//LOGOUT------------------------------------------------------------

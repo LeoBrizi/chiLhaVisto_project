@@ -1,25 +1,22 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-
+//schema post---------------------------------------
 var PostSchema = new Schema({
 	
   tipoPost: {
     type: String,
-    required: 'Per favore, indicare se il post riguarda un oggetto perso o ritrovato'
+    description: "Per favore, indicare se il post riguarda un oggetto perso o ritrovato",
+    required: true
   },
   
   categoria: {
-	  type: [{
-		  type: String,
-		  enum: ['Elettronica','Abbigliamento','Cartoleria','Altro']
-	  }]
-	  required: "Per favore, indicare a quale categoria appartiene l'oggetto"
+	enum: ["Elettronica", "Abbigliamento", "Cartoleria", "Altro"],
+	description: "Per favore, indicare a quale categoria appartiene l'oggetto",
+	required: true
   },
   
-  sottoCategoria: {
-	  type: String
-  },
+  sottoCategoria: String,
   
 /*  immagine: {
 	  type: 
@@ -33,20 +30,29 @@ var PostSchema = new Schema({
   
   luogo: {
     type: String,
-    required : "Per favore, indicare il luogo dove è stato perso o ritrovato l'oggetto"
+    description : "Per favore, indicare il luogo dove è stato perso o ritrovato l'oggetto"
   },
   
-  ricompensa: {
-	  type: Number
-  },
+  ricompensa: Number,
   
-  Descrizione: {
-	  type: String
-  }
+  Descrizione: String
 });
 
+//schema utente-------------------------------
 var UtenteSchema = new Schema({
-	
+	facebook         : {
+        id           : String,
+        token        : String,
+        name         : String,
+        email        : String
+    },
+    
+    twitter          : {
+        id           : String,
+        token        : String,
+        displayName  : String,
+        username     : String
+    }
 });
 
 module.exports.Post = mongoose.model('Post', PostSchema);
