@@ -11,6 +11,7 @@ var PostSchema = new Schema({
   },
   
   categoria: {
+	type: String,
 	enum: ["Elettronica", "Abbigliamento", "Cartoleria", "Altro"],
 	description: "Per favore, indicare a quale categoria appartiene l'oggetto",
 	required: true
@@ -35,7 +36,9 @@ var PostSchema = new Schema({
   
   ricompensa: Number,
   
-  Descrizione: String
+  descrizione: String,
+
+  user_id: Number
 });
 
 //schema utente-------------------------------
@@ -45,15 +48,9 @@ var UtenteSchema = new Schema({
         token        : String,
         name         : String,
         email        : String
-    },
-    
-    twitter          : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        username     : String
     }
 });
 
 module.exports.Post = mongoose.model('Post', PostSchema);
 module.exports.Utente = mongoose.model('Utente',UtenteSchema);
+
