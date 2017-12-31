@@ -36,6 +36,8 @@ module.exports = function(app){
 	});
 
 	app.get('/profilo/:id',function(req,res){
+		
+		//res.render('profilo'); 
     
         //RECUPERO POST UTENTE-------------------------------------
         var u_id=req.id;                                             //id utente che ha creato nuovo post
@@ -72,7 +74,7 @@ module.exports = function(app){
         //parte di codice per inserire la entry in coda
     });
     
-    /*ELIMINAZIONE POST DA DB:
+    /*ELIMINAZIONE POST DA DB (da scegliere route-metodo):
      *  var post= require('../models/listModels.js').Post;
      *  post.deleteOne({<query>}, function (err) {                
             if (err) return console.error(err);            
@@ -83,7 +85,8 @@ module.exports = function(app){
 	//LOGOUT------------------------------------------------------------
 	
 	app.get('/logout', function(req,res) {
-		//res.render('index');
+		//res.redirect('/');
 	});
 
 }
+

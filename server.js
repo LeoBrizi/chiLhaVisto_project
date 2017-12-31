@@ -8,8 +8,6 @@ var app = express();
 
 var port = process.env.PORT || costanti.defaultPort; 
 
-var path = require("path");
-
 var mongoose = require('mongoose');  
 var configDB = require('./config/database.js');
 
@@ -23,12 +21,10 @@ mongoose.connect(configDB.url, {useMongoClient: true},function(err, db) {
     }
 }); // connesso al database
 
-
 const pug = require('pug');
 
 var bodyParser = require("body-parser"); //per parsare il body della post
 app.use(bodyParser.urlencoded({ extended: false }));
-
 
 app.set('view engine', 'pug');
 
