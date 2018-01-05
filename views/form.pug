@@ -1,0 +1,58 @@
+doctype html
+html
+	head
+		title Nuovo Post
+		meta(charset="UTF-8")
+		meta(name="viewport", content="width=device-width, initial-scale=1.0")
+		meta(http-equiv="X-UA-Compatible", content="ie=edge")
+		script(type='text/javascript').
+	body
+		h1
+			|Nuovo Post
+		
+		form(action='', method='POST' )
+     
+			div.form-group
+				label(for='tipoPost') Indicare se il post riguarda un oggetto perso o ritrovato: (*)
+				select#tipoPost.form-control(type='select', name='tipoPost', required='true')
+					option(value='', selected='selected') -----
+					each tipoPost in tipoPostOpt
+						option(value=tipoPost.value) #{tipoPost.value}
+						
+			div.form-group
+				label(for='categoria') Indicare a quale categoria appartiene l'oggetto: (*)
+				select#categoria.form-control(type='select', name='categoria', required='true')
+					option(value='', selected='selected') -----
+					each categoria in catOpt
+						option(value=categoria.value) #{categoria.value}
+
+			div.form-group
+				label(for='sottoCategoria') Indicare una sottocategoria (titolo descrittivo) per l'oggetto:
+				input#sottoCategoria.form-control(type='text', name='sottoCategoria', value=(undefined===form ? '' : form.sottoCategoria))
+
+			div.form-group
+				label(for='data') Inserire la data in cui è stato perso o ritrovato l'oggetto:
+				input#data.form-control(type='date', placeholder='yyyy/mm/dd', name='data', value=(undefined===form ? '' : form.data))
+
+			div.form-group
+				label(for='citta') Indicare la città in cui è stato perso o ritrovato l'oggetto: (*)
+				input#citta.form-control(type='text', placeholder='Roma', name='citta', required='true', value=(undefined===form ? '' : form.citta))
+
+			div.form-group
+				label(for='luogo') Indicare il luogo (via, piazza, edificio, locale...) in cui è stato perso o ritrovato l'oggetto:
+				input#luogo.form-control(type='text', placeholder='via Eudossiana 18', name='luogo', value=(undefined===form ? '' : form.luogo))
+
+			div.form-group
+				label(for='descrizione') Descrizione dell'oggetto perso o ritrovato:
+				input#descrizione.form-control(type='textarea', name='descrizione', value=(undefined===form ? '' : form.descrizione))    
+
+			div.form-group
+				label(for='ricompensa') Indicare una ricompensa in euro (se l'oggetto è stato ritrovato, questo campo non verrà considerato):
+				input#ricompensa.form-control(type='text', placeholder='10', name='ricompensa', value=(undefined===form ? '' : form.ricompensa))
+
+			button.btn.btn-primary(type='submit') Salva
+
+		if errors 
+			ul
+				for error in errors
+					li!= error.msg
