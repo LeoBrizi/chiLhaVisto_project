@@ -35,7 +35,12 @@ var PostSchema = new Schema({
   
   ricompensa: Number,
   
-  Descrizione: String
+  descrizione: String,
+
+  autore:String,
+
+  emailAutore:String
+
 });
 
 //schema utente-------------------------------
