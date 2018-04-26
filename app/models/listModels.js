@@ -6,11 +6,13 @@ var PostSchema = new Schema({
 	
   tipoPost: {
     type: String,
+    enum: ["Perso", "Trovato"],
     description: "Per favore, indicare se il post riguarda un oggetto perso o ritrovato",
     required: true
   },
   
   categoria: {
+	type: String,
 	enum: ["Elettronica", "Abbigliamento", "Cartoleria", "Altro"],
 	description: "Per favore, indicare a quale categoria appartiene l'oggetto",
 	required: true
@@ -28,12 +30,23 @@ var PostSchema = new Schema({
     default: Date.now
   },
   
+  città: {
+	type: String,
+	required: true
+  },
+  
   luogo: {
     type: String,
     description : "Per favore, indicare il luogo dove è stato perso o ritrovato l'oggetto"
   },
   
-  ricompensa: Number,
+  descrizione: String,
+  
+  ricompensa: String,
+  
+  user_id: String, 
+  
+  user_em: String,
   
   descrizione: String,
 
@@ -55,3 +68,4 @@ var UtenteSchema = new Schema({
 
 module.exports.Post = mongoose.model('Post', PostSchema);
 module.exports.Utente = mongoose.model('Utente',UtenteSchema);
+
