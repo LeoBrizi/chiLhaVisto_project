@@ -1,3 +1,4 @@
+const costanti = require("./config/cost_proc");
 var request = require('request'); 
 
 //parte riguardante code
@@ -8,9 +9,9 @@ var request = require('request');
 var data = {												//body della request
 	"from": "chiLhaVisto",
 	"text": "Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!",
-	//"to": TO_NUMBER,		numero da prendere da facebook
-	"api_key": "fef73437",
-	"api_secret": require("./config/cost_proc")				//da recuperare da costanti
+	//"to": TO_NUMBER,		numero da prendere da db
+	"api_key": costanti.api_key,
+	"api_secret": costanti.api_secret						//da recuperare da costanti
 }
 
 var options = {												//opzioni della request

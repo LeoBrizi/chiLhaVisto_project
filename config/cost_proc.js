@@ -1,5 +1,6 @@
 module.exports = {
-
-    "api_secret": "3a3e89af491691fb"
+	
+	"api_key"	: "fef73437",
+    "api_secret": "aBcDeF123456"
 
 };

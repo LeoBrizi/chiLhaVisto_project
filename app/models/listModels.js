@@ -46,13 +46,7 @@ var PostSchema = new Schema({
   
   user_id: String, 
   
-  user_em: String,
-  
-  descrizione: String,
-
-  autore:String,
-
-  emailAutore:String
+  user_em: String
 
 });
 
@@ -62,7 +56,8 @@ var UtenteSchema = new Schema({
         id           : String,
         token        : String,
         name         : String,
-        email        : String
+        email        : String,
+        phone		 : String
     }
 });
 

@@ -1,9 +1,8 @@
-
-
 module.exports = function(app,request,querystring){
 	
 	const { body,validationResult } = require('express-validator/check');
 	const { sanitizeBody } = require('express-validator/filter');
+	const costanti = require("../../config/auth");
 
 	// PAGINA INIZIALE--------------------------------------------------
 	
@@ -16,9 +15,52 @@ module.exports = function(app,request,querystring){
 	app.get('/login',function(req,res){
 		res.render("login");
 	});
+	
+	app.get('/login/facebook',function(req,res){
+		
+		var urlfb = costanti.facebookAuth.urlFb;
+		
+		var query = querystring.stringify({
+			client_id: costanti.facebookAuth.clientID,
+    		redirect_uri: costanti.facebookAuth.callbackURL,
+			response_type : 'code',
+			scope: costanti.facebookAuth.permissions
+		});
+		res.redirect(urlfb + query);
+	});
 
-	app.post('/login',function(req,res){
-
+	app.get('/callbackfacebook',function(req,res){
+  		var queryString = {
+    		code: req.query.code,
+    		client_id: costanti.facebookAuth.clientID,
+    		client_secret: costanti.facebookAuth.clientSecret,
+    		redirect_uri: costanti.facebookAuth.callbackURL,
+  		}
+		request.get({url: 'https://graph.facebook.com/v2.11/oauth/access_token', qs: queryString}, function optionalCallback(err, httpResponse, body) {
+  			if (err) {
+   				return console.error('upload failed:', err);
+  			}
+  			console.log('Upload successful!  Server responded with:', body);
+			var info = JSON.parse(body);
+			if(info.error === 'access_denied' && info.error_reason === 'user_denied'){
+				res.redirect("/login");
+			}
+			//res.send("Got the token "+ info.access_token);
+			//salvare dB??
+			queryString = {
+				access_token: info.access_token
+			}
+			console.log(queryString);
+			request.get({url: 'https://graph.facebook.com/me', qs:queryString},function optionalCallback(err, httpResponse, body){
+				if(err){
+					return console.error('upload failed:', err);
+				}
+				var info = JSON.parse(body);
+				console.log(info);
+				//se non già presente salvare info utente (id, nome, token, email) su db e reindirizzarlo su pagina per ottenere numero di telefono, da cui rimandato su profilo; se già presente caricare suo profilo (ha senso aggiornare info?)
+				res.redirect("/profilo/"+info.id);
+				});
+			});
 	});
 	
 	//PROFILO-----------------------------------------------------------
@@ -26,10 +68,10 @@ module.exports = function(app,request,querystring){
 	app.get('/profilo/:id',function(req,res){
 		
 		//res.render('profilo'); 
-		if (req.id=='nuovo_post') next();
-    
+		res.send("profilo utente"+u_id);									
+		
         //RECUPERO POST UTENTE-------------------------------------
-        var u_id=req.id;                                            //id utente che ha creato nuovo post
+        var u_id=req.params.id;   									
         var post= require('../models/listModels.js').Post;          //recuperiamo il modello dei post
         post.find({ user_id: u_id }, function (err, result) {		//trovati tutti i post aventi user_id=u_id
             if (err) return console.error(err);                     //caso errore
@@ -41,14 +83,14 @@ module.exports = function(app,request,querystring){
 
     //NUOVO POST--------------------------------------------------------
 
-    app.get('/nuovo_post', function (req, res){
+    app.get('/nuovo_post/:id', function (req, res){
 		const tipoPostOpt = [{value: "Perso"}, {value: "Trovato"}];
 		const catOpt= [{value: "Elettronica"}, {value: "Abbigliamento"},{value: "Cartoleria"},{value: "Altro"}];
         res.render('form', {tipoPostOpt: tipoPostOpt, catOpt: catOpt});
         //da passare id user così che quando fatta post ho id user
     });
 
-    app.post('/nuovo_post', [
+    app.post('/nuovo_post/:id', [
 		
 		//verifichiamo che città e data siano state inserite correttamente
 		body('citta').isLength({ min: 1 }).trim().withMessage('Città non inserita.')
@@ -96,18 +138,18 @@ module.exports = function(app,request,querystring){
 				//i dati sono validi
 				
 				/* TUTTO COMMENTATO FINCHè NON PASSATO ID (SENNò NON COMPILA)
-				* var u_id=; //id utente che ha creato nuovo post
+				* var u_id=req.params.id; ; 						//id utente che ha creato nuovo post
        
 				//POST INSERITO NEL DB------------------------------
 				var post= require('../models/listModels.js').Post;  //recuperiamo il modello dei post
 				info.user_id= u_id;                                 //aggiungiamo all'oggetto JSON l'utente 
-				info.user_em= //chiamata rest a fb!
+				info.user_em= 				//da db!
 				var entry= new post(info);                          //creata la entry
 				entry.save(function (err) {                         //salvata la entry sul db
 					if (err) return console.error(err);             //caso errore
 				});
 				*/
-				//parte di codice per inserire la entry in coda
+				//parte di codice per inserire la entry in coda+condividi su facebook(chiamata REST)
 			}
 		}
     ]);
@@ -123,54 +165,8 @@ module.exports = function(app,request,querystring){
 	//LOGOUT------------------------------------------------------------
 	
 	app.get('/logout', function(req,res) {
-		//res.redirect('/');
+		res.redirect('/');
 	});
 
-	app.get('/login/facebook',function(req,res){
-
-		var urlfb = 'https://www.facebook.com/v2.11/dialog/oauth?';
-		
-		var query = querystring.stringify({
-			client_id: '1857911927781379',
-    		redirect_uri: 'http://localhost:3000/callbackfacebook',
-			response_type : 'code',
-			scope:'public_profile,email,publish_actions'
-		});
-		res.redirect(urlfb + query);
-	});
-
-	app.get('/callbackfacebook',function(req,res){
-		var c_id = '1857911927781379';
-  		var queryString = {
-    		code: req.query.code,
-    		client_id: c_id,
-    		client_secret: '4e008a8e293d41d2cd18183da951651f',
-    		redirect_uri: 'http://localhost:3000/callbackfacebook',
-  		}
-		request.get({url: 'https://graph.facebook.com/v2.11/oauth/access_token', qs: queryString}, function optionalCallback(err, httpResponse, body) {
-  			if (err) {
-   				return console.error('upload failed:', err);
-  			}
-  			console.log('Upload successful!  Server responded with:', body);
-			var info = JSON.parse(body);
-			if(info.error === 'access_denied' && info.error_reason === 'user_denied'){
-				res.redirect("/login");
-			}
-			//res.send("Got the token "+ info.access_token);
-			//salvare dB??
-			queryString = {
-				access_token: info.access_token
-			}
-			console.log(queryString);
-			request.get({url: 'https://graph.facebook.com/me', qs:queryString},function optionalCallback(err, httpResponse, body){
-				if(err){
-					return console.error('upload failed:', err);
-				}
-				var info = JSON.parse(body);
-				console.log(info);
-				res.redirect("/profilo?id="+info.id);
-				});
-			});
-	});
 }
 
