@@ -31,8 +31,7 @@ var PostSchema = new Schema({
   },
   
   città: {
-	type: String,
-	required: true
+	type: String
   },
   
   luogo: {
@@ -52,13 +51,11 @@ var PostSchema = new Schema({
 
 //schema utente-------------------------------
 var UtenteSchema = new Schema({
-	facebook         : {
-        id           : String,
-        token        : String,
-        name         : String,
-        email        : String,
-        phone		 : String
-    }
+    id           : String,
+    token        : String,
+    name         : String,
+    email        : String,
+	phone		 : String
 });
 
 module.exports.Post = mongoose.model('Post', PostSchema);

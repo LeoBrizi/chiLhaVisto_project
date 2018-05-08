@@ -31,8 +31,8 @@ html
 				input#sottoCategoria.form-control(type='text', name='sottoCategoria', value=(undefined===form ? '' : form.sottoCategoria))
 
 			div.form-group
-				label(for='data') Inserire la data in cui è stato perso o ritrovato l'oggetto:
-				input#data.form-control(type='date', placeholder='yyyy/mm/dd', name='data', value=(undefined===form ? '' : form.data))
+				label(for='data') Inserire la data in cui è stato perso o ritrovato l'oggetto: (*)
+				input#data.form-control(type='date', placeholder='yyyy/mm/dd', name='data', required='true', value=(undefined===form ? '' : form.data))
 
 			div.form-group
 				label(for='citta') Indicare la città in cui è stato perso o ritrovato l'oggetto: (*)

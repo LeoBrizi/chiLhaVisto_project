@@ -1,0 +1,24 @@
+doctype html
+html
+	head
+		title Numero di cellulare
+		meta(charset="UTF-8")
+		meta(name="viewport", content="width=device-width, initial-scale=1.0")
+		meta(http-equiv="X-UA-Compatible", content="ie=edge")
+		script(type='text/javascript').
+	body
+		h1
+			|La nostra applicazione utilizza il numero di cellulare per notificare quando vengono trovati post interessanti relativi a quelli inseriti dall'utente
+		
+		form(action='', method='POST' )
+     
+			div.form-group
+				label(for='numero') Numero cellulare: (*)
+				input#numero.form-control(type='text', placeholder='33--------', name='numero', required='true', value=(undefined===form ? '' : form.numero))
+
+			button.btn.btn-primary(type='submit') Salva
+
+		if errors 
+			ul
+				for error in errors
+					li!= error.msg

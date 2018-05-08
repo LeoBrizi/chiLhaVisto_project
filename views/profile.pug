@@ -1,0 +1,15 @@
+h1 Profilo
+p I tuoi post:
+br
+each post in posts
+    p= post
+        a(href='/delete_post/' + post._id ) Delete
+        form(action='/delete_post/' + post._id, method='GET')
+            input(type='submit', value='Elimina')
+br
+form(action='/nuovo_post/'+ id, method='GET')
+            input(type='submit', value='Nuovo Post')
+br
+form(action='/logout', method='GET')
+            input(type='submit', value='Disconettiti')
+br
