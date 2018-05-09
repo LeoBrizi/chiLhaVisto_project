@@ -31,7 +31,8 @@ var PostSchema = new Schema({
   },
   
   città: {
-	type: String
+	type: String,
+	required: true
   },
   
   luogo: {

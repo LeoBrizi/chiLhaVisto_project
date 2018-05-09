@@ -23,6 +23,10 @@ module.exports = function(app,request,querystring){
             if (err) return console.error(err);            
             else console.log(result);
         });
+        user.find({}, function (result, err) {                
+            if (err) return console.error(err);            
+            else console.log(result);
+        });
 	});
 	
 	//LOGIN-------------------------------------------------------------
@@ -205,7 +209,7 @@ module.exports = function(app,request,querystring){
 				categoria: req.body.categoria,
 				sottoCategoria: req.body.sottoCategoria,
 				data: req.body.data,
-				citta: req.body.citta,
+				città: req.body.citta,
 				luogo: req.body.luogo,
 				descrizione: req.body.descrizione,
 				ricompensa: req.body.ricompensa		
@@ -250,14 +254,20 @@ module.exports = function(app,request,querystring){
     
     //ELIMINAZIONE POST DA DB (per adesso qui):-------------------------RIMANE QUI O IN PROCESSO O ENTRAMBE? da rivedere
     app.get('/delete_post/:id', function (req, res){
-         post.deleteOne({_id: req.params.id }, function (err) {                
+		post.findOne({_id: req.params.id }, function (err,result) {                
             if (err) return console.error(err);            
             else {
-				console.log('eliminato!');
-				res.redirect("/profilo/"+req.params.id);
+				var u_id=result.user_id;
+				 post.deleteOne({_id: req.params.id }, function (err) {                
+					if (err) return console.error(err);            
+					else {
+						console.log('eliminato!');
+						res.render('deleted', {id: u_id}); 
+					}
+				 });
 			}
-         });
-    });
+		});
+	});
 		
 	//LOGOUT------------------------------------------------------------HA SENSO?
 	

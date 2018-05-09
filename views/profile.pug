@@ -1,15 +1,59 @@
 h1 Profilo
-p I tuoi post:
-br
+h2 I tuoi post:
 each post in posts
-    p= post
-        a(href='/delete_post/' + post._id ) Delete
-        form(action='/delete_post/' + post._id, method='GET')
-            input(type='submit', value='Elimina')
+    tr
+        td(style="border: 1px solid green")
+            | Tipo di post: #{post.tipoPost}
+            br
+            | Categoria: #{post.categoria}
+            br
+            if (post.sottoCategoria)
+                tr
+                    td(style="border: 1px solid green")
+                        | Sottocategoria: #{post.sottoCategoria}
+                        br
+                    td(style="border: 1px solid green")
+            | Data: #{post.data.getDate()}/#{post.data.getMonth()+1}/#{post.data.getFullYear()}
+            br
+            | Città: #{post.città}
+            br
+            if (post.luogo)
+                tr
+                    td(style="border: 1px solid green")
+                        | Luogo: #{post.luogo}
+                        br
+                    td(style="border: 1px solid green")
+            if (post.descrizione)
+                tr
+                    td(style="border: 1px solid green")
+                        | Descrizione: #{post.descrizione}
+                        br
+                    td(style="border: 1px solid green")
+            if (post.ricompensa)
+                tr
+                    td(style="border: 1px solid green")
+                        | Ricompensa: #{post.ricompensa}
+                        br
+                    td(style="border: 1px solid green")
+            a(href='/delete_post/' + post._id )
+                button(type="button") Delete 
+            br
+            br
+        td(style="border: 1px solid green")
+                            
+else
+    tr  
+        td Ancora nessun post...
+        br
 br
 form(action='/nuovo_post/'+ id, method='GET')
             input(type='submit', value='Nuovo Post')
+h2 Post correlati:
+if ('')
+else
+    tr  
+        td Ancora nessun post...
+        br
 br
 form(action='/logout', method='GET')
             input(type='submit', value='Disconettiti')
-br
