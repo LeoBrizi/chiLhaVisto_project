@@ -27,6 +27,21 @@ mongoose.connect(configDB.url, {useMongoClient: true},function(err, db) {
     }
 }); // connesso al database
 
+
+var amqp = require('amqplib/callback_api');
+const configBroker = require('./config/amqp_const');
+
+//TEST RABBITMQ MESSAGE BROKER RUNNING----------------------------------
+amqp.connect(configBroker.url,function(err, conn) {
+    if (err) {
+        console.log('Unable to connect to the message broker. Please start it. Error:', err);
+    } else {
+        console.log('RabbitMQ message broker is running!');
+    }
+});
+
+
+
 var pug = require('pug');
 
 var bodyParser = require("body-parser"); //per parsare il body della post
@@ -36,7 +51,7 @@ app.set('view engine', 'pug');
 
 var routes = require('./app/routes/listRoutes');   //importa routes, gestore delle chiamate http
 
-routes(app,request,querystring); //passati app e passport per essere usati in routes
+routes(app,request,amqp,querystring); //passati app e passport per essere usati in routes
 
 
 

@@ -5,6 +5,41 @@ var request = require('request');
 //recupero info post
 //RICERCA POST SIMILI-----------------------------------------
 
+var amqp = require('amqplib/callback_api');
+const configBroker = require('./config/amqp_const');
+
+amqp.connect(configBroker.url, function(err,connection){
+    connection.createChannel(function(err,channel){
+        var exchange = configBroker.exchange_search;
+        channel.assertExchange(exchange,'topic',{durable: false});
+
+        //Due code: post ritrovati e post oersi
+        channel.assertQueue('codaPersi',{exclusive: true}, function(err,q){     //exclusive = coda esistente finché processo non muore
+            channel.bindQueue(q.queue, exchange, 'Perso');
+            channel.consume(q.queue,function(msg){
+                console.log(" [x] Received");
+                post = JSON.parse(msg.content);
+                console.log(JSON.stringify(post));
+                //RICERCA POST--------------------------------
+                //INVIO RISULTATI-----------------------------
+                //parte di ari ancora da implementare
+            }, {noAck: true});
+        });
+
+        channel.assertQueue('codaTrovati',{exclusive: true}, function(err,q){     //exclusive = coda esistente finché processo non muore
+            channel.bindQueue(q.queue, exchange, 'Trovato');
+            channel.consume(q.queue,function(msg){
+                console.log(" [x] Received");
+                post = JSON.parse(msg.content);
+                console.log(JSON.stringify(post));
+                //RICERCA POST--------------------------------
+                //INVIO RISULTATI-----------------------------
+                //parte di ari ancora da implementare
+            }, {noAck: true});
+        });
+    });
+});
+
 //INVIO MESSAGGIO---------------------------------------------
 var data = {												//body della request
 	"from": "chiLhaVisto",

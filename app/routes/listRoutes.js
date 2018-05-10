@@ -1,10 +1,11 @@
-module.exports = function(app,request,querystring){
+module.exports = function(app,request,amqp,querystring){
 	
 	const { body,validationResult } = require('express-validator/check');
 	const { sanitizeBody } = require('express-validator/filter');
 	const costanti = require("../../config/auth");
 	const user= require('../models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
 	const post= require('../models/listModels.js').Post;			//recuperiamo il modello dei post
+	const configBroker = require('../../config/amqp_const');
 	
 	// PAGINA INIZIALE--------------------------------------------------
 	
@@ -247,7 +248,26 @@ module.exports = function(app,request,querystring){
 				});
 								
 				//parte di codice per inserire la entry in coda+condividi su facebook(chiamata REST)
-				
+				//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
+				amqp.connect(configBroker.url, function(err,connection){
+					if (err) return console.error(err);
+					connection.createChannel(function(err,channel){
+						if (err) return console.error(err);
+						var exchange = configBroker.exchange_search;
+						var key = info.tipoPost;
+						var msg = [{
+							categoria :  info.categoria,
+							data : info.data,
+							citta : info.citta,
+							sottoCategoria : info.sottoCategoria
+						}];
+
+						channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
+						channel.publish(exchange,key, new Buffer(JSON.stringify(msg)));
+						console.log("	Post sent to queue %s", key);
+						console.log(JSON.parse(JSON.stringify(msg)));
+					});
+				});
 			}
 		}
     ]);
