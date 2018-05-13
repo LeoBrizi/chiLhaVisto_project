@@ -49,7 +49,46 @@ br
 form(action='/nuovo_post/'+ id, method='GET')
             input(type='submit', value='Nuovo Post')
 h2 Post correlati:
-if ('')
+each conn in conn_p
+    tr
+        td(style="border: 1px solid green")
+            | Tipo di post: #{conn.tipoPost}
+            br
+            | Categoria: #{conn.categoria}
+            br
+            if (conn.sottoCategoria)
+                tr
+                    td(style="border: 1px solid green")
+                        | Sottocategoria: #{conn.sottoCategoria}
+                        br
+                    td(style="border: 1px solid green")
+            | Data: #{conn.data.getDate()}/#{conn.data.getMonth()+1}/#{conn.data.getFullYear()}
+            br
+            | Città: #{conn.città}
+            br
+            if (conn.luogo)
+                tr
+                    td(style="border: 1px solid green")
+                        | Luogo: #{conn.luogo}
+                        br
+                    td(style="border: 1px solid green")
+            if (conn.descrizione)
+                tr
+                    td(style="border: 1px solid green")
+                        | Descrizione: #{conn.descrizione}
+                        br
+                    td(style="border: 1px solid green")
+            if (conn.ricompensa)
+                tr
+                    td(style="border: 1px solid green")
+                        | Ricompensa: #{conn.ricompensa}
+                        br
+                    td(style="border: 1px solid green")
+            | Email utente: #{conn.user_em}
+            br
+            br
+        td(style="border: 1px solid green")
+     
 else
     tr  
         td Ancora nessun post...

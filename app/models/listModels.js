@@ -46,7 +46,9 @@ var PostSchema = new Schema({
   
   user_id: String, 
   
-  user_em: String
+  user_em: String,
+  
+  connected: Array
 
 });
 

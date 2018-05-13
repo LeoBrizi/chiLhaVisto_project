@@ -7,6 +7,17 @@ module.exports = function(app,request,amqp,querystring){
 	const post= require('../models/listModels.js').Post;			//recuperiamo il modello dei post
 	const configBroker = require('../../config/amqp_const');
 	
+	function remove(array, element) {
+		console.log( array +'da cui tolgo ' + element);
+		const index = array.indexOf(element);
+		console.log(index);
+		if (index !== -1) {
+			array.splice(index, 1);
+		}
+		console.log(array)
+		return array;
+	}
+	
 	// PAGINA INIZIALE--------------------------------------------------
 	
 	app.get('/', function(req,res) {    
@@ -16,11 +27,7 @@ module.exports = function(app,request,amqp,querystring){
 	//DEBUG-------------------------------------------------------------
 	
 	app.get('/debug', function(req,res){
-		/*user.deleteOne({id: '10216600133180941'}, function ( err) {                
-            if (err) return console.error(err);     
-            else console.log('eliminato!');       
-        });id: '10216600133180941'
-		*/post.find({}, function (result, err) {                
+		post.find({}, function (result, err) {                
             if (err) return console.error(err);            
             else console.log(result);
         });
@@ -101,7 +108,7 @@ module.exports = function(app,request,amqp,querystring){
 						user.update({ id: info.id }, { token: token_u, email: info.email }, function(err, raw) {	//aggiorno info
 							if (err) return console.error(err);
 							console.log(raw);
-							res.redirect("/profilo/"+info.id); 							//carico suo profilo
+							res.redirect("/profilo/"+info.id); 						//carico suo profilo
 						});		
 					}
 				})	
@@ -161,21 +168,26 @@ module.exports = function(app,request,amqp,querystring){
 	//PROFILO-----------------------------------------------------------MANCANO POST SIMILI
 
 	app.get('/profilo/:id',function(req,res){
-
-		//res.send("profilo utente"+req.params.id);									
+		
+		var conn=[];
 		
         //RECUPERO POST UTENTE-------------------------------------
         var u_id=req.params.id;   									
         post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
             if (err) return console.error(err);                     //caso errore
-            //Mostrati post trovati=results
-            res.render('profile', {posts: results, id: u_id}); 
-        })
-
-        //altro... (da recuperare post simili prima di fare la render)    
+            //post trovati=results
+            for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
+				conn=conn.concat((results[i].connected));
+			} 
+			post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
+				if (err) return console.error(err);                     //caso errore
+				//post correlati=conn_p;
+				res.render('profile', {posts: results, conn_p: conn_p, id: u_id}); 
+			})
+		})
 	});
 
-    //NUOVO POST--------------------------------------------------------FINE CODE+CONDIVISIONE FACEBOOK
+    //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
 
     app.get('/nuovo_post/:id', function (req, res){						//da passare id user così che quando fatta post ho id user
 		const tipoPostOpt = [{value: "Perso"}, {value: "Trovato"}];
@@ -228,6 +240,7 @@ module.exports = function(app,request,amqp,querystring){
 			else{
 				//i dati sono validi
 				var u_id=req.params.id;  									//id utente che ha creato nuovo post
+				var p_id='';
        
 				//POST INSERITO NEL DB------------------------------
 				info.user_id= u_id;
@@ -241,13 +254,13 @@ module.exports = function(app,request,amqp,querystring){
 							if (err) return console.error(err);             //caso errore
 							else {
 								console.log('inserito post nel db');
-								res.redirect("/profilo/"+u_id);
+								p_id=entry._id;
+								res.render('added', {id: u_id});
 							}
 						});
 					}
 				});
 								
-				//parte di codice per inserire la entry in coda+condividi su facebook(chiamata REST)
 				//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
 				amqp.connect(configBroker.url, function(err,connection){
 					if (err) return console.error(err);
@@ -256,10 +269,11 @@ module.exports = function(app,request,amqp,querystring){
 						var exchange = configBroker.exchange_search;
 						var key = info.tipoPost;
 						var msg = [{
+							id: p_id,
+							user: u_id,
 							categoria :  info.categoria,
 							data : info.data,
-							citta : info.citta,
-							sottoCategoria : info.sottoCategoria
+							citta : info.città
 						}];
 
 						channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
@@ -268,24 +282,31 @@ module.exports = function(app,request,amqp,querystring){
 						console.log(JSON.parse(JSON.stringify(msg)));
 					});
 				});
+				
+				//condividi su facebook(chiamata REST)
 			}
 		}
     ]);
     
-    //ELIMINAZIONE POST DA DB (per adesso qui):-------------------------RIMANE QUI O IN PROCESSO O ENTRAMBE? da rivedere
+    //ELIMINAZIONE POST DA DB (per adesso qui):-------------------------
     app.get('/delete_post/:id', function (req, res){
-		post.findOne({_id: req.params.id }, function (err,result) {                
+		post.findOne({_id: req.params.id }, function (err,result) {     //ho bisogno dell'id utente (per reindirizzarlo poi sul profilo) e della lista dei post correlati          
             if (err) return console.error(err);            
-            else {
-				var u_id=result.user_id;
-				 post.deleteOne({_id: req.params.id }, function (err) {                
+			var u_id=result.user_id;
+			var conn=result.connected; 
+			post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
+				if (err) return console.error(err);
+				for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
+					results[i].connected=remove(results[i].connected, req.params.id ); 
+					results[i].save();
+				} 	
+				console.log('eliminato nei correlati!');
+				post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
 					if (err) return console.error(err);            
-					else {
-						console.log('eliminato!');
-						res.render('deleted', {id: u_id}); 
-					}
-				 });
-			}
+					console.log('eliminato!');
+					res.render('deleted', {id: u_id}); 					//avviso che è riuscita l'eliminazione
+				});		
+			});	
 		});
 	});
 		
