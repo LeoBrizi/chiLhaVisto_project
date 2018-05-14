@@ -8,13 +8,10 @@ module.exports = function(app,request,amqp,querystring){
 	const configBroker = require('../../config/amqp_const');
 	
 	function remove(array, element) {
-		console.log( array +'da cui tolgo ' + element);
 		const index = array.indexOf(element);
-		console.log(index);
 		if (index !== -1) {
 			array.splice(index, 1);
 		}
-		console.log(array)
 		return array;
 	}
 	
@@ -169,22 +166,29 @@ module.exports = function(app,request,amqp,querystring){
 
 	app.get('/profilo/:id',function(req,res){
 		
-		var conn=[];
+		var u_id=req.params.id;
+		user.findOne({id: u_id}, function (err, result) {           
+			if (err) return console.error(err);            
+			if (result.token=='') res.redirect("/");   		//controlliamo se entrato sul profilo da schermata login
+			else {
+				var conn=[];
 		
-        //RECUPERO POST UTENTE-------------------------------------
-        var u_id=req.params.id;   									
-        post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
-            if (err) return console.error(err);                     //caso errore
-            //post trovati=results
-            for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
-				conn=conn.concat((results[i].connected));
-			} 
-			post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
-				if (err) return console.error(err);                     //caso errore
-				//post correlati=conn_p;
-				res.render('profile', {posts: results, conn_p: conn_p, id: u_id}); 
-			})
-		})
+				//RECUPERO POST UTENTE-------------------------------------
+           									
+				post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
+					if (err) return console.error(err);                     //caso errore
+					//post trovati=results
+					for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
+						conn=conn.concat((results[i].connected));
+					} 
+					post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
+						if (err) return console.error(err);                     //caso errore
+						//post correlati=conn_p;
+						res.render('profile', {posts: results, conn_p: conn_p, id: u_id}); 
+					})
+				})	
+			}	
+		});
 	});
 
     //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
@@ -310,10 +314,14 @@ module.exports = function(app,request,amqp,querystring){
 		});
 	});
 		
-	//LOGOUT------------------------------------------------------------HA SENSO?
+	//LOGOUT------------------------------------------------------------
 	
-	app.get('/logout', function(req,res) {
-		res.redirect('/');
+	app.get('/logout/:id', function(req,res) {
+		user.update({ id: req.params.id }, { token: ''}, function(err, raw) {	//aggiorno info
+			if (err) return console.error(err);
+			console.log(raw);
+			res.redirect("/"); 											
+		});	
 	});
 
 }

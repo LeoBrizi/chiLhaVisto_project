@@ -1,8 +1,20 @@
 const costanti = require("./config/cost_proc");
 const configBroker = require('./config/amqp_const');
 const posts= require('./app/models/listModels.js').Post;			//recuperiamo il modello dei post
+const user= require('../models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
 
 var request = require('request'); 
+
+//opzioni della request sms
+var options = {												
+    url: 'https://rest.nexmo.com/sms/json',
+    method: 'POST',
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: data,
+    json:true
+};
 
 var mongoose = require('mongoose');  
 var configDB = require('./config/database.js');
@@ -25,6 +37,14 @@ function StringToDate(date){
 	return mydate;
 }
 
+//callback richiesta sms
+function callback(error, response, body) {					
+    if (!error && response.statusCode == 200) {
+        console.log(JSON.stringify(body));
+    }
+    else console.log("Error: message not sent");
+}
+
 //find nelle code
 function findCorr(post, tipo, queryData) {
 	posts.find({ tipoPost: tipo, categoria: post.categoria, user_id: { $ne: post.user}, data: queryData, città: { $in: [(post.citta).toUpperCase(), post.citta.toLowerCase(), post.citta.charAt(0).toUpperCase() + post.citta.slice(1).toLowerCase()]} }, function (err, results) {		//trovati tutti i post correlati
@@ -35,6 +55,17 @@ function findCorr(post, tipo, queryData) {
 			results[i].connected=results[i].connected.concat(post.id);
 			results[i].save();
 			conn=conn.concat(results[i]._id);
+			/*INVIO MESSAGGIO-------------------------------------------
+			user.find({ id: results[i].user_id}, function (err, res){
+				var data = {												//body della request
+					"from": "chiLhaVisto",
+					"text": "Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!",
+					"to": res.phone,
+					"api_key": costanti.api_key,
+					"api_secret": costanti.api_secret						//da recuperare da costanti
+				}
+				request(options, callback);									//chiamata rest per sms (POST)
+			 }*/
 		}
 		console.log('Aggiunto post ai correlati');
 		posts.update({ _id: post.id }, { connected: conn }, function(err, raw) {	//aggiorno info
@@ -74,40 +105,14 @@ amqp.connect(configBroker.url, function(err,connection){
                 console.log(JSON.stringify(post));
                 //RICERCA POST--------------------------------
                 findCorr(post[0], 'Perso', { $lte: StringToDate(post[0].data) });
-                //INVIO RISULTATI-----------------------------
                 //parte di ari ancora da implementare
             }, {noAck: true});
         });
     });
 });
 
-//INVIO MESSAGGIO---------------------------------------------DA VEDERE QUANDO INVIARLOO
-var data = {												//body della request
-	"from": "chiLhaVisto",
-	"text": "Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!",
-	//"to": TO_NUMBER,		numero da prendere da db
-	"api_key": costanti.api_key,
-	"api_secret": costanti.api_secret						//da recuperare da costanti
-}
 
-var options = {												//opzioni della request
-    url: 'https://rest.nexmo.com/sms/json',
-    method: 'POST',
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: data,
-    json:true
-};
 
-function callback(error, response, body) {					//callback rischiesta
-    if (!error && response.statusCode == 200) {
-        console.log(JSON.stringify(body));
-    }
-    else console.log("Error: message to"+ /*NUMBER*/ +"not sent");
-}
-
-request(options, callback);									//chiamata rest (POST)
 
      
 
