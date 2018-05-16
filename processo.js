@@ -1,20 +1,9 @@
 const costanti = require("./config/cost_proc");
 const configBroker = require('./config/amqp_const');
 const posts= require('./app/models/listModels.js').Post;			//recuperiamo il modello dei post
-const user= require('../models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
+const user= require('./app/models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
 
 var request = require('request'); 
-
-//opzioni della request sms
-var options = {												
-    url: 'https://rest.nexmo.com/sms/json',
-    method: 'POST',
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: data,
-    json:true
-};
 
 var mongoose = require('mongoose');  
 var configDB = require('./config/database.js');
@@ -64,6 +53,17 @@ function findCorr(post, tipo, queryData) {
 					"api_key": costanti.api_key,
 					"api_secret": costanti.api_secret						//da recuperare da costanti
 				}
+				
+				//opzioni della request sms
+				var options = {												
+					url: 'https://rest.nexmo.com/sms/json',
+					method: 'POST',
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: data,
+					json:true
+				};
 				request(options, callback);									//chiamata rest per sms (POST)
 			 }*/
 		}
