@@ -288,6 +288,28 @@ module.exports = function(app,request,amqp,querystring){
 				});
 				
 				//condividi su facebook(chiamata REST)
+				if (info.tipoPost=='Perso'){
+					user.findOne({id: u_id}, function(err,result){
+						if (err) return console.error(err);
+						else{
+							var message="In data: "+info.data+", mi sono perso: "+info.sottoCategoria+
+								" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
+							var options = {												
+								url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
+								method: 'POST',
+								headers: {
+									"Content-Type": "application/json"
+								},
+								json:true
+							};
+							request.post(options, function(error,response,body){
+								if (!error && response.statusCode == 200) {
+									console.log(body)
+								}						
+							});
+						}
+					})
+				}
 			}
 		}
     ]);
