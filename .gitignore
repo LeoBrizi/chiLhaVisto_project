@@ -1,2 +1,4 @@
 node_modules/
 package-lock.json
+config/auth.js
+config/cost_proc.js
