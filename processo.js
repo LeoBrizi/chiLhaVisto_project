@@ -44,28 +44,18 @@ function findCorr(post, tipo, queryData) {
 			results[i].connected=results[i].connected.concat(post.id);
 			results[i].save();
 			conn=conn.concat(results[i]._id);
-			/*INVIO MESSAGGIO-------------------------------------------
-			user.find({ id: results[i].user_id}, function (err, res){
-				var data = {												//body della request
-					"from": "chiLhaVisto",
-					"text": "Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!",
-					"to": res.phone,
-					"api_key": costanti.api_key,
-					"api_secret": costanti.api_secret						//da recuperare da costanti
-				}
-				
-				//opzioni della request sms
-				var options = {												
-					url: 'https://rest.nexmo.com/sms/json',
-					method: 'POST',
-					headers: {
-						"Content-Type": "application/json"
-					},
-					body: data,
-					json:true
-				};
-				request(options, callback);									//chiamata rest per sms (POST)
-			 }*/
+			//INVIO MESSAGGIO-------------------------------------------
+			user.findOne({ id: results[i].user_id}, function (err, res){
+				if (err) return console.error(err);
+				var numero = 39+res.phone;
+				var url = 'https://rest.nexmo.com/sms/json?'+"api_key="+costanti.api_key+"&api_secret="+costanti.api_secret+"&to="+numero+"&from=chiLhaVisto"+"&text=Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!"
+				console.log(url);
+				request.post(url, function(error,response,body){
+					if (!error && response.statusCode == 200) {
+						console.log(body)
+					}						
+				});									//chiamata rest per sms (POST)
+			})
 		}
 		console.log('Aggiunto post ai correlati');
 		posts.update({ _id: post.id }, { connected: conn }, function(err, raw) {	//aggiorno info
