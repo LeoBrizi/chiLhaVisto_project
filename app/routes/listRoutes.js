@@ -1,4 +1,4 @@
-module.exports = function(app,request,amqp,querystring){
+module.exports = function(app,request,amqp,querystring,io){
 	
 	const { body,validationResult } = require('express-validator/check');
 	const { sanitizeBody } = require('express-validator/filter');
@@ -34,14 +34,8 @@ module.exports = function(app,request,amqp,querystring){
         });
 	});
 	
-	//LOGIN-------------------------------------------------------------
-
+	//LOGIN------------------------------------------------------------
 	app.get('/login',function(req,res){
-		res.render("login");
-	});
-	
-	app.get('/login/facebook',function(req,res){
-		
 		var urlfb = costanti.facebookAuth.urlFb;
 		
 		var query = querystring.stringify({
@@ -65,7 +59,7 @@ module.exports = function(app,request,amqp,querystring){
   			if (err) {
    				return console.error('upload failed:', err);
   			}
-  			console.log('Upload successful!  Server responded with:', body);
+  			//console.log('Upload successful!  Server responded with:', body);
 			var info = JSON.parse(body);
 			if(info.error === 'access_denied' && info.error_reason === 'user_denied'){
 				res.redirect("/login");
@@ -74,13 +68,13 @@ module.exports = function(app,request,amqp,querystring){
 				access_token: info.access_token
 			}
 			token_u=info.access_token;
-			console.log(queryString);
+			//console.log(queryString);
 			request.get({url: 'https://graph.facebook.com/v3.0/me?fields=id,name,email', qs:queryString},function optionalCallback(err, httpResponse, body){
 				if(err){
 					return console.error('upload failed:', err);
 				}
 				var info = JSON.parse(body);
-				console.log(info);
+				//console.log(info);
 				//controllo se utente già nel db      		
 				user.find({id: info.id}, function (err, result) {					//cerchiamo l'utente nel db
 					if (err) return console.error(err);                     		//caso errore
@@ -119,7 +113,6 @@ module.exports = function(app,request,amqp,querystring){
     });
     
     app.post('/numero/:id', [
-		
 		//verifichiamo che numero sia stato inserito correttamente
 		body('numero').isLength({ min: 9, max:10 }).withMessage('Numero non inserito')
 		.isAlphanumeric().withMessage('Inserire solo valori validi')
@@ -130,18 +123,13 @@ module.exports = function(app,request,amqp,querystring){
         
         //togliamo per ogni valore possibili spazi aggiuntivi
         sanitizeBody('*').trim(),
-        
         //continuiamo la richiesta        
         (req, res)=> {
-			
 			//estraiamo gli errori della form
 			const errors = validationResult(req);
-			
 			//prendiamo i dati ottenuti 
 			var numero=req.body.numero;
-			
 			if (numero.data==null || numero.data=='') delete numero.data;
-			
 			if (!errors.isEmpty()) {
             // Ci sono degli errori: restituiamo la form nuovamente con valori puliti dagli spazi-errori segnalati.
 				res.render('number', { errors: errors.array() });
@@ -150,7 +138,6 @@ module.exports = function(app,request,amqp,querystring){
 			else{
 				//i dati sono validi
 				var u_id=req.params.id; 					
-       
 				//NUMERO INSERITO NEL DB------------------------------
 				user.update({ id: u_id }, { phone: numero }, function(err, raw) {	//aggiorno info
 					if (err) return console.error(err);
@@ -160,8 +147,6 @@ module.exports = function(app,request,amqp,querystring){
 			}
 		}
     ]);
-	 		
-	
 	//PROFILO-----------------------------------------------------------MANCANO POST SIMILI
 
 	app.get('/profilo/:id',function(req,res){
@@ -172,9 +157,8 @@ module.exports = function(app,request,amqp,querystring){
 			if (result.token=='') res.redirect("/");   		//controlliamo se entrato sul profilo da schermata login
 			else {
 				var conn=[];
-		
+
 				//RECUPERO POST UTENTE-------------------------------------
-           									
 				post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
 					if (err) return console.error(err);                     //caso errore
 					//post trovati=results
@@ -192,7 +176,6 @@ module.exports = function(app,request,amqp,querystring){
 	});
 
     //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
-
     app.get('/nuovo_post/:id', function (req, res){						//da passare id user così che quando fatta post ho id user
 		const tipoPostOpt = [{value: "Perso"}, {value: "Trovato"}];
 		const catOpt= [{value: "Elettronica"}, {value: "Abbigliamento"},{value: "Cartoleria"},{value: "Altro"}];
@@ -286,7 +269,6 @@ module.exports = function(app,request,amqp,querystring){
 						console.log(JSON.parse(JSON.stringify(msg)));
 					});
 				});
-				
 				//condividi su facebook(chiamata REST)
 				if (info.tipoPost=='Perso'){
 					user.findOne({id: u_id}, function(err,result){ //devo cercare il token dell'utente
@@ -338,13 +320,18 @@ module.exports = function(app,request,amqp,querystring){
 		
 	//LOGOUT------------------------------------------------------------
 	
-	app.get('/logout/:id', function(req,res) {
+	app.post('/profilo/:id', function(req,res) {
 		user.update({ id: req.params.id }, { token: ''}, function(err, raw) {	//aggiorno info
 			if (err) return console.error(err);
 			console.log(raw);
 			res.redirect("/"); 											
 		});	
 	});
+
+	app.get('/refresh',function(req,res){
+		console.log("ci sono nuovi correlati");
+		res.send("ok");
+	})
 
 }
 

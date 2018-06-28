@@ -1,4 +1,5 @@
 const costanti = require("./config/cost_proc");
+const serverCostanti = require("./config/costanti");
 const configBroker = require('./config/amqp_const');
 const posts= require('./app/models/listModels.js').Post;			//recuperiamo il modello dei post
 const user= require('./app/models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
@@ -50,18 +51,25 @@ function findCorr(post, tipo, queryData) {
 				var numero = 39+res.phone;
 				var url = 'https://rest.nexmo.com/sms/json?'+"api_key="+costanti.api_key+"&api_secret="+costanti.api_secret+"&to="+numero+"&from=chiLhaVisto"+"&text=Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!"
 				console.log(url);
-				request.post(url, function(error,response,body){
+				/*request.post(url, function(error,response,body){
 					if (!error && response.statusCode == 200) {
 						console.log(body)
 					}						
-				});									//chiamata rest per sms (POST)
+                });		//chiamata rest per sms (POST)
+                */
 			})
 		}
 		console.log('Aggiunto post ai correlati');
 		posts.update({ _id: post.id }, { connected: conn }, function(err, raw) {	//aggiorno info
 			if (err) return console.error(err);
 			console.log('Aggiunti correlati');
-		});							
+        });
+        var serverUrl = 'http://'+serverCostanti.ipServer+":"+serverCostanti.defaultPort+"/refresh";
+        request.get(serverUrl,function(err,response,body){
+            if (!err && response.statusCode == 200) {
+                console.log(body)
+            }
+        })
 	})
 }
 
