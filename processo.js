@@ -37,20 +37,21 @@ function callback(error, response, body) {
 
 //find nelle code
 function findCorr(post, tipo, queryData) {
+    var utentiDaInformare = post.user;
 	posts.find({ tipoPost: tipo, categoria: post.categoria, user_id: { $ne: post.user}, data: queryData, città: { $in: [(post.citta).toUpperCase(), post.citta.toLowerCase(), post.citta.charAt(0).toUpperCase() + post.citta.slice(1).toLowerCase()]} }, function (err, results) {		//trovati tutti i post correlati
 		if (err) return console.error(err); //caso errore
 		console.log(results);
-		var conn=[];                     
+        var conn=[];                     
 		for (var i = 0; i <results.length; i++) {			
 			results[i].connected=results[i].connected.concat(post.id);
 			results[i].save();
 			conn=conn.concat(results[i]._id);
-			//INVIO MESSAGGIO-------------------------------------------
+            //INVIO MESSAGGIO-------------------------------------------
+            utentiDaInformare = utentiDaInformare+';'+results[i].user_id
 			user.findOne({ id: results[i].user_id}, function (err, res){
 				if (err) return console.error(err);
 				var numero = 39+res.phone;
 				var url = 'https://rest.nexmo.com/sms/json?'+"api_key="+costanti.api_key+"&api_secret="+costanti.api_secret+"&to="+numero+"&from=chiLhaVisto"+"&text=Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!"
-				console.log(url);
 				/*request.post(url, function(error,response,body){
 					if (!error && response.statusCode == 200) {
 						console.log(body)
@@ -63,14 +64,14 @@ function findCorr(post, tipo, queryData) {
 		posts.update({ _id: post.id }, { connected: conn }, function(err, raw) {	//aggiorno info
 			if (err) return console.error(err);
 			console.log('Aggiunti correlati');
-        });
-        var serverUrl = 'http://'+serverCostanti.ipServer+":"+serverCostanti.defaultPort+"/refresh";
-        request.get(serverUrl,function(err,response,body){
-            if (!err && response.statusCode == 200) {
+        })											
+        url= 'http://'+serverCostanti.ipServer+":"+serverCostanti.defaultPort+"/refresh/";
+        request.get(url+utentiDaInformare, function(error,response,body){
+            if (!error && response.statusCode == 200) {
                 console.log(body)
-            }
+            }						
         })
-	})
+    })
 }
 
 //CODE--------------------------------------------------------

@@ -312,7 +312,6 @@ module.exports = function(app,request,amqp,querystring,io){
 				post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
 					if (err) return console.error(err);            
 					console.log('eliminato!');
-					console.log(u_id);
 					res.redirect("/profilo/"+u_id);
 				});		
 			});	
@@ -328,9 +327,25 @@ module.exports = function(app,request,amqp,querystring,io){
 		});	
 	});
 
-	app.get('/refresh',function(req,res){
-		console.log("ci sono nuovi correlati");
-		io.emit("refresh",'ciao')
+	app.get('/refresh/:utentiDaInformare',function(req,res){
+		var utenti = req.params.utentiDaInformare.split(";");
+		console.log(utenti);
+		for (var i = 0; i <utenti.length; i++) {
+			var conn=[];
+			post.find({ user_id: utenti[i] }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
+				if (err) return console.error(err);                     //caso errore
+				//post trovati=results
+				for (var j = 0; j <results.length; j++) {					//da recuperare post correllati
+					conn=conn.concat((results[j].connected));
+				} 
+				post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
+					if (err) return console.error(err);                     //caso errore
+					//post correlati=conn_p;
+					console.log(conn_p);
+					io.emit(utenti[i],conn_p) 
+				})
+			})
+		}
 		res.send("ok");
 	})
 
