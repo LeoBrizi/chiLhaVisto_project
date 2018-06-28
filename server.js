@@ -47,3 +47,13 @@ var server = app.listen(port,function(){
 var io = socket(server);
 
 routes(app,request,amqp,querystring,io); //passati app e passport per essere usati in routes
+
+io.on('connection', (socket) => {
+    console.log('user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+    socket.on('id',function(data){
+        console.log(data);
+    })
+});

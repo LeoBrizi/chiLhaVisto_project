@@ -242,7 +242,7 @@ module.exports = function(app,request,amqp,querystring,io){
 							else {
 								console.log('inserito post nel db');
 								p_id=entry._id;
-								res.render('added', {id: u_id});
+								res.redirect("/profilo/"+u_id);
 							}
 						});
 					}
@@ -312,14 +312,14 @@ module.exports = function(app,request,amqp,querystring,io){
 				post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
 					if (err) return console.error(err);            
 					console.log('eliminato!');
-					res.render('deleted', {id: u_id}); 					//avviso che è riuscita l'eliminazione
+					console.log(u_id);
+					res.redirect("/profilo/"+u_id);
 				});		
 			});	
 		});
 	});
 		
 	//LOGOUT------------------------------------------------------------
-	
 	app.post('/profilo/:id', function(req,res) {
 		user.update({ id: req.params.id }, { token: ''}, function(err, raw) {	//aggiorno info
 			if (err) return console.error(err);
@@ -330,6 +330,7 @@ module.exports = function(app,request,amqp,querystring,io){
 
 	app.get('/refresh',function(req,res){
 		console.log("ci sono nuovi correlati");
+		io.emit("refresh",'ciao')
 		res.send("ok");
 	})
 

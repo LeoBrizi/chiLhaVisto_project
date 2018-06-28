@@ -94,5 +94,16 @@ else
         td Ancora nessun post...
         br
 br
+script(src="/socket.io/socket.io.js")
+script.
+    var socket = io();
+    socket.on(#{id},function(data){
+        console.log(data);
+        if(data === 'reload')
+            location.reload();
+    })
+    socket.on('postrefreshed',function(data){
+        //visualizza i post
+    })
 form(action='/profilo/'+id, method='POST')
             input(type='submit', value='Disconettiti')
