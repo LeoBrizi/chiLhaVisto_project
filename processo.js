@@ -52,12 +52,11 @@ function findCorr(post, tipo, queryData) {
 				if (err) return console.error(err);
 				var numero = 39+res.phone;
 				var url = 'https://rest.nexmo.com/sms/json?'+"api_key="+costanti.api_key+"&api_secret="+costanti.api_secret+"&to="+numero+"&from=chiLhaVisto"+"&text=Abbiamo nuovi post che fanno al caso tuo! Vieni a controllare!"
-				/*request.post(url, function(error,response,body){
+				request.post(url, function(error,response,body){
 					if (!error && response.statusCode == 200) {
 						console.log(body)
 					}						
                 });		//chiamata rest per sms (POST)
-                */
 			})
 		}
 		console.log('Aggiunto post ai correlati');
