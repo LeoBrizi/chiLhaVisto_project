@@ -49,56 +49,44 @@ br
 form(action='/nuovo_post/'+ id, method='GET')
             input(type='submit', value='Nuovo Post')
 h2 Post correlati:
-each conn in conn_p
-    tr
-        td(style="border: 1px solid green")
-            | Tipo di post: #{conn.tipoPost}
-            br
-            | Categoria: #{conn.categoria}
-            br
-            if (conn.sottoCategoria)
-                tr
-                    td(style="border: 1px solid green")
-                        | Sottocategoria: #{conn.sottoCategoria}
-                        br
-                    td(style="border: 1px solid green")
-            | Data: #{conn.data.getDate()}/#{conn.data.getMonth()+1}/#{conn.data.getFullYear()}
-            br
-            | Città: #{conn.città}
-            br
-            if (conn.luogo)
-                tr
-                    td(style="border: 1px solid green")
-                        | Luogo: #{conn.luogo}
-                        br
-                    td(style="border: 1px solid green")
-            if (conn.descrizione)
-                tr
-                    td(style="border: 1px solid green")
-                        | Descrizione: #{conn.descrizione}
-                        br
-                    td(style="border: 1px solid green")
-            if (conn.ricompensa)
-                tr
-                    td(style="border: 1px solid green")
-                        | Ricompensa: #{conn.ricompensa}
-                        br
-                    td(style="border: 1px solid green")
-            | Email utente: #{conn.user_em}
-            br
-            br
-        td(style="border: 1px solid green")
-     
-else
-    tr  
-        td Ancora nessun post...
-        br
-br
+#postCorrelati
+
 script(src="/socket.io/socket.io.js")
+script(src="https://code.jquery.com/jquery-1.11.1.js")
 script.
+    var permission = 'denied';
+    try {
+    Notification.requestPermission().then(function(status) {
+        permission = status;
+        console.log('Web notification status: '+ permission);
+    });
+    } catch (error) { // Safari 9 doesn't return a promise for requestPermissions
+        Notification.requestPermission(function(status) {
+            permission = status;
+            console.log('Web notification status: '+ permission);
+        });
+    }
+
     var socket = io();
+    console.log(#{id})
     socket.on(#{id},function(data){
         console.log(data);
+        if(data === 'reload'){
+            socket.emit("reload",#{id})
+        }else{
+            if(permission === 'granted' && data.length != 0){
+                var notification = new Notification("ChiLhaVisto",{body:"hai nuovi correlati"});
+            }
+            if(data.length == 0)
+                 $('#postCorrelati').html('Ancora nessun post ...');
+            else{
+                $('#postCorrelati').html('');
+                for(var i = 0; i < data.length;i++){
+                    $('#postCorrelati').append('<p>'+"categoria: "+data[i].categoria+" citta: "+data[i].città+" data: "+data[i].data+" descrizione: "+data[i].descrizione+" luogo: "+data[i].luogo+" sottoCategoria: "+data[i].sottoCategoria+" tipoPost: "+data[i].tipoPost+" user_em: "+data[i].user_em+'</p>');
+                    $('#postCorrelati').append('<br>');
+                }
+            }
+        }
     })
 
 form(action='/profilo/'+id, method='POST')

@@ -162,13 +162,11 @@ module.exports = function(app,request,amqp,querystring,io){
 				post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
 					if (err) return console.error(err);                     //caso errore
 					//post trovati=results
-					for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
-						conn=conn.concat((results[i].connected));
-					} 
 					post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
 						if (err) return console.error(err);                     //caso errore
 						//post correlati=conn_p;
-						res.render('profile', {posts: results, conn_p: conn_p, id: u_id}); 
+						res.render('profile', {posts: results, id: u_id})
+						io.emit(u_id,"reload");
 					})
 				})	
 			}	
@@ -177,9 +175,16 @@ module.exports = function(app,request,amqp,querystring,io){
 
     //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
     app.get('/nuovo_post/:id', function (req, res){						//da passare id user così che quando fatta post ho id user
-		const tipoPostOpt = [{value: "Perso"}, {value: "Trovato"}];
-		const catOpt= [{value: "Elettronica"}, {value: "Abbigliamento"},{value: "Cartoleria"},{value: "Altro"}];
-        res.render('form', {tipoPostOpt: tipoPostOpt, catOpt: catOpt});
+		var u_id=req.params.id;
+		user.findOne({id: u_id}, function (err, result) {           
+			if (err) return console.error(err);            
+			if (result.token=='') res.redirect("/");
+			else{
+				const tipoPostOpt = [{value: "Perso"}, {value: "Trovato"}];
+				const catOpt= [{value: "Elettronica"}, {value: "Abbigliamento"},{value: "Cartoleria"},{value: "Altro"}];
+				res.render('form', {tipoPostOpt: tipoPostOpt, catOpt: catOpt});
+			}
+		})
     });
 
     app.post('/nuovo_post/:id', [
@@ -196,103 +201,109 @@ module.exports = function(app,request,amqp,querystring,io){
         
         //continuiamo la richiesta        
         (req, res)=> {
+			var u_id=req.params.id;
+			user.findOne({id: u_id}, function (err, result) {           
+				if (err) return console.error(err);            
+				if (result.token=='') res.redirect("/");
+				else{
+					const tipoPostOpt = [{value: 'Perso'}, {value: 'Trovato'}];
+					const catOpt= [{value: "Elettronica"}, {value: 'Abbigliamento'},{value: 'Cartoleria'},{value: 'Altro'}];
+				
+					//estraiamo gli errori della form
+					const errors = validationResult(req);
+					
+					//prendiamo i dati ottenuti 
+					var info= {
+						tipoPost: req.body.tipoPost,
+						categoria: req.body.categoria,
+						sottoCategoria: req.body.sottoCategoria,
+						data: req.body.data,
+						città: req.body.citta,
+						luogo: req.body.luogo,
+						descrizione: req.body.descrizione,
+						ricompensa: req.body.ricompensa		
+					};
+					
+					if (info.data==null || info.data=='') delete info.data;
+					
+					if (info.tipoPost=='Trovato') delete info.ricompensa;
+					
+					if (!errors.isEmpty()) {
+					// Ci sono degli errori: restituiamo la form nuovamente con valori puliti dagli spazi-errori segnalati.
+						res.render('form', { tipoPostOpt: tipoPostOpt, catOpt: catOpt, info:info, errors: errors.array() });
+						return;
+					}
+					else{
+						//i dati sono validi
+						var u_id=req.params.id;  									//id utente che ha creato nuovo post
+						var p_id='';
 			
-			const tipoPostOpt = [{value: 'Perso'}, {value: 'Trovato'}];
-			const catOpt= [{value: "Elettronica"}, {value: 'Abbigliamento'},{value: 'Cartoleria'},{value: 'Altro'}];
-		
-			//estraiamo gli errori della form
-			const errors = validationResult(req);
-			
-			//prendiamo i dati ottenuti 
-			var info= {
-				tipoPost: req.body.tipoPost,
-				categoria: req.body.categoria,
-				sottoCategoria: req.body.sottoCategoria,
-				data: req.body.data,
-				città: req.body.citta,
-				luogo: req.body.luogo,
-				descrizione: req.body.descrizione,
-				ricompensa: req.body.ricompensa		
-			};
-			
-			if (info.data==null || info.data=='') delete info.data;
-			
-			if (info.tipoPost=='Trovato') delete info.ricompensa;
-			 
-			if (!errors.isEmpty()) {
-            // Ci sono degli errori: restituiamo la form nuovamente con valori puliti dagli spazi-errori segnalati.
-				res.render('form', { tipoPostOpt: tipoPostOpt, catOpt: catOpt, info:info, errors: errors.array() });
-				return;
-			}
-			else{
-				//i dati sono validi
-				var u_id=req.params.id;  									//id utente che ha creato nuovo post
-				var p_id='';
-       
-				//POST INSERITO NEL DB------------------------------
-				info.user_id= u_id;
-				user.findOne({id: u_id}, function (err, result) {           //recupero email da database  
-					if (err) return console.error(err);            
-					else {
-						info.user_em=result.email;
-						console.log(info)
-						var entry= new post(info);                          //creata la entry
-						entry.save(function (err) {                         //salvata la entry sul db
-							if (err) return console.error(err);             //caso errore
+						//POST INSERITO NEL DB------------------------------
+						info.user_id= u_id;
+						user.findOne({id: u_id}, function (err, result) {           //recupero email da database  
+							if (err) return console.error(err);            
 							else {
-								console.log('inserito post nel db');
-								p_id=entry._id;
-								res.redirect("/profilo/"+u_id);
+								info.user_em=result.email;
+								console.log(info)
+								var entry= new post(info);                          //creata la entry
+								entry.save(function (err) {                         //salvata la entry sul db
+									if (err) return console.error(err);             //caso errore
+									else {
+										console.log('inserito post nel db');
+										p_id=entry._id;
+										res.render('added', {id: u_id});
+									}
+								});
 							}
 						});
-					}
-				});
-								
-				//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
-				amqp.connect(configBroker.url, function(err,connection){
-					if (err) return console.error(err);
-					connection.createChannel(function(err,channel){
-						if (err) return console.error(err);
-						var exchange = configBroker.exchange_search;
-						var key = info.tipoPost;
-						var msg = [{
-							id: p_id,
-							user: u_id,
-							categoria :  info.categoria,
-							data : info.data,
-							citta : info.città
-						}];
+										
+						//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
+						amqp.connect(configBroker.url, function(err,connection){
+							if (err) return console.error(err);
+							connection.createChannel(function(err,channel){
+								if (err) return console.error(err);
+								var exchange = configBroker.exchange_search;
+								var key = info.tipoPost;
+								var msg = [{
+									id: p_id,
+									user: u_id,
+									categoria :  info.categoria,
+									data : info.data,
+									citta : info.città
+								}];
 
-						channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
-						channel.publish(exchange,key, new Buffer(JSON.stringify(msg)));
-						console.log("	Post sent to queue %s", key);
-						console.log(JSON.parse(JSON.stringify(msg)));
-					});
-				});
-				//condividi su facebook(chiamata REST)
-				if (info.tipoPost=='Perso'){
-					user.findOne({id: u_id}, function(err,result){ //devo cercare il token dell'utente
-						if (err) return console.error(err);
-						else{
-							var message="In data: "+info.data+", mi sono perso/a: "+info.sottoCategoria+
-								" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
-							var options = {												
-								url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
-								method: 'POST',
-								headers: {
-									"Content-Type": "application/json"
-								},
-								json:true
-							};
-							request.post(options, function(error,response,body){
-								if (!error && response.statusCode == 200) {
-									console.log(body)
-								}						
+								channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
+								channel.publish(exchange,key, new Buffer(JSON.stringify(msg)));
+								console.log("	Post sent to queue %s", key);
+								console.log(JSON.parse(JSON.stringify(msg)));
 							});
+						});
+						//condividi su facebook(chiamata REST)
+						if (info.tipoPost=='Perso'){
+							user.findOne({id: u_id}, function(err,result){ //devo cercare il token dell'utente
+								if (err) return console.error(err);
+								else{
+									var message="In data: "+info.data+", mi sono perso/a: "+info.sottoCategoria+
+										" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
+									var options = {												
+										url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
+										method: 'POST',
+										headers: {
+											"Content-Type": "application/json"
+										},
+										json:true
+									};
+									request.post(options, function(error,response,body){
+										if (!error && response.statusCode == 200) {
+											console.log(body)
+										}						
+									});
+								}
+							})
 						}
-					})
+					}
 				}
-			}
+			})
 		}
     ]);
     
@@ -301,20 +312,28 @@ module.exports = function(app,request,amqp,querystring,io){
 		post.findOne({_id: req.params.id }, function (err,result) {     //ho bisogno dell'id utente (per reindirizzarlo poi sul profilo) e della lista dei post correlati          
             if (err) return console.error(err);            
 			var u_id=result.user_id;
-			var conn=result.connected; 
-			post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
-				if (err) return console.error(err);
-				for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
-					results[i].connected=remove(results[i].connected, req.params.id ); 
-					results[i].save();
-				} 	
-				console.log('eliminato nei correlati!');
-				post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
-					if (err) return console.error(err);            
-					console.log('eliminato!');
-					res.redirect("/profilo/"+u_id);
-				});		
-			});	
+			user.findOne({id: u_id}, function (err, result) {           
+				if (err) return console.error(err);            
+				if (result.token=='') res.redirect("/");
+				else{
+					var conn=result.connected; 
+					post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
+						if (err) return console.error(err);
+						for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
+							results[i].connected=remove(results[i].connected, req.params.id ); 
+							results[i].save();
+							console.log("bisogna aggiornare:"+results[i].user_id)
+							io.emit(results[i].user_id,"reload")
+						} 	
+						console.log('eliminato nei correlati!');
+						post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
+							if (err) return console.error(err);            
+							console.log('eliminato!');
+							res.render('deleted', {id: u_id});
+						});		
+					});	
+				}
+			})
 		});
 	});
 		
@@ -329,22 +348,8 @@ module.exports = function(app,request,amqp,querystring,io){
 
 	app.get('/refresh/:utentiDaInformare',function(req,res){
 		var utenti = req.params.utentiDaInformare.split(";");
-		console.log(utenti);
-		for (var i = 0; i <utenti.length; i++) {
-			var conn=[];
-			post.find({ user_id: utenti[i] }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
-				if (err) return console.error(err);                     //caso errore
-				//post trovati=results
-				for (var j = 0; j <results.length; j++) {					//da recuperare post correllati
-					conn=conn.concat((results[j].connected));
-				} 
-				post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
-					if (err) return console.error(err);                     //caso errore
-					//post correlati=conn_p;
-					console.log(conn_p);
-					io.emit(utenti[i],conn_p) 
-				})
-			})
+		for (var i = 0; i < utenti.length; i++) {
+			io.emit(utenti[i],"reload")
 		}
 		res.send("ok");
 	})

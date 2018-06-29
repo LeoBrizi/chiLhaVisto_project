@@ -48,12 +48,27 @@ var io = socket(server);
 
 routes(app,request,amqp,querystring,io); //passati app e passport per essere usati in routes
 
+const user= require('./app/models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
+const post= require('./app/models/listModels.js').Post;			//recuperiamo il modello dei post
+	
+
 io.on('connection', (socket) => {
     console.log('user connected');
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
-    socket.on('id',function(data){
-        console.log(data);
+    socket.on('reload',function(data){
+        var conn=[];
+        console.log('è arrivato un messaggio di reload da:'+data)
+        post.find({ user_id: data }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
+            if (err) return console.error(err);
+            for (var j = 0; j <results.length; j++) {					//da recuperare post correllati
+                conn=conn.concat((results[j].connected));
+            } 
+            post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
+                if (err) return console.error(err);                     //caso errore
+                socket.emit(data,conn_p) 
+            })
+        })
     })
 });
