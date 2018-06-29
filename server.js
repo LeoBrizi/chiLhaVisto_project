@@ -70,5 +70,8 @@ io.on('connection', (socket) => {
                 socket.emit(data,conn_p) 
             })
         })
+    });
+    socket.on('render',function(data){
+        socket.emit(data,"reload");
     })
 });

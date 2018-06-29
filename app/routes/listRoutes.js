@@ -120,7 +120,6 @@ module.exports = function(app,request,amqp,querystring,io){
 		.optional({ checkFalsy: true }).withMessage('Numero non inserito correttamente'),
         
         //optional=>verifica solo se effettivamente inserito il valore, checkFalsy: true => considero null e '' valori nulli
-        
         //togliamo per ogni valore possibili spazi aggiuntivi
         sanitizeBody('*').trim(),
         //continuiamo la richiesta        
@@ -150,27 +149,18 @@ module.exports = function(app,request,amqp,querystring,io){
 	//PROFILO-----------------------------------------------------------MANCANO POST SIMILI
 
 	app.get('/profilo/:id',function(req,res){
-		
 		var u_id=req.params.id;
 		user.findOne({id: u_id}, function (err, result) {           
 			if (err) return console.error(err);            
 			if (result.token=='') res.redirect("/");   		//controlliamo se entrato sul profilo da schermata login
 			else {
-				var conn=[];
-
 				//RECUPERO POST UTENTE-------------------------------------
 				post.find({ user_id: u_id }, function (err, results) {		//trovati tutti i post aventi user_id=u_id
 					if (err) return console.error(err);                     //caso errore
-					//post trovati=results
-					post.find({ _id: { $in: conn} }, function (err, conn_p) {	//trovati tutti i post 
-						if (err) return console.error(err);                     //caso errore
-						//post correlati=conn_p;
-						res.render('profile', {posts: results, id: u_id})
-						io.emit(u_id,"reload");
-					})
+					res.render('profile', {posts: results, id: u_id})
 				})	
 			}	
-		});
+		})
 	});
 
     //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
@@ -211,7 +201,6 @@ module.exports = function(app,request,amqp,querystring,io){
 				
 					//estraiamo gli errori della form
 					const errors = validationResult(req);
-					
 					//prendiamo i dati ottenuti 
 					var info= {
 						tipoPost: req.body.tipoPost,
@@ -256,7 +245,7 @@ module.exports = function(app,request,amqp,querystring,io){
 								});
 							}
 						});
-										
+
 						//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
 						amqp.connect(configBroker.url, function(err,connection){
 							if (err) return console.error(err);
@@ -308,32 +297,26 @@ module.exports = function(app,request,amqp,querystring,io){
     ]);
     
     //ELIMINAZIONE POST DA DB (per adesso qui):-------------------------
-    app.get('/delete_post/:id', function (req, res){
+	app.get('/delete_post/:id', function (req, res){
 		post.findOne({_id: req.params.id }, function (err,result) {     //ho bisogno dell'id utente (per reindirizzarlo poi sul profilo) e della lista dei post correlati          
             if (err) return console.error(err);            
 			var u_id=result.user_id;
-			user.findOne({id: u_id}, function (err, result) {           
-				if (err) return console.error(err);            
-				if (result.token=='') res.redirect("/");
-				else{
-					var conn=result.connected; 
-					post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
-						if (err) return console.error(err);
-						for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
-							results[i].connected=remove(results[i].connected, req.params.id ); 
-							results[i].save();
-							console.log("bisogna aggiornare:"+results[i].user_id)
-							io.emit(results[i].user_id,"reload")
-						} 	
-						console.log('eliminato nei correlati!');
-						post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
-							if (err) return console.error(err);            
-							console.log('eliminato!');
-							res.render('deleted', {id: u_id});
-						});		
-					});	
-				}
-			})
+			var conn=result.connected; 
+			post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
+				if (err) return console.error(err);
+				console.log("AOOOOOOOOOOOOOOOOOOOOOOO: "+results);
+				for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
+					results[i].connected=remove(results[i].connected, req.params.id ); 
+					results[i].save();
+					io.emit(results[i].user_id,"reload");
+				} 	
+				console.log('eliminato nei correlati!');
+				post.deleteOne({ _id: req.params.id }, function (err) {		//elimino il post
+					if (err) return console.error(err);            
+					console.log('eliminato!');
+					res.render('deleted', {id: u_id}); 					//avviso che è riuscita l'eliminazione
+				});		
+			});	
 		});
 	});
 		

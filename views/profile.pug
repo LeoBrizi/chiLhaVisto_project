@@ -69,9 +69,10 @@ script.
 
     var socket = io();
     console.log(#{id})
+    socket.emit("render",#{id})
     socket.on(#{id},function(data){
         console.log(data);
-        if(data === 'reload'){
+        if(data == 'reload'){
             socket.emit("reload",#{id})
         }else{
             if(permission === 'granted' && data.length != 0){
@@ -81,8 +82,20 @@ script.
                  $('#postCorrelati').html('Ancora nessun post ...');
             else{
                 $('#postCorrelati').html('');
+                $('#postCorrelati').append('<br>');
                 for(var i = 0; i < data.length;i++){
-                    $('#postCorrelati').append('<p>'+"categoria: "+data[i].categoria+" citta: "+data[i].città+" data: "+data[i].data+" descrizione: "+data[i].descrizione+" luogo: "+data[i].luogo+" sottoCategoria: "+data[i].sottoCategoria+" tipoPost: "+data[i].tipoPost+" user_em: "+data[i].user_em+'</p>');
+                    $('#postCorrelati').append('<p>'+"Tipo di post: "+data[i].tipoPost+"\n</p>")
+                    $('#postCorrelati').append('<p>'+"Categoria: "+data[i].categoria+"\n</p>")
+                    $('#postCorrelati').append('<p>'+"Sottocategoria: "+data[i].sottoCategoria+"\n</p>")
+                    $('#postCorrelati').append('<p>'+"Data: "+data[i].data+"\n</p>")
+                    $('#postCorrelati').append('<p>'+"Città: "+data[i].città+"\n</p>")
+                    $('#postCorrelati').append('<p>'+"Email utente: "+data[i].user_em+"\n</p>")
+                    if(data[i].luogo.length != 0){
+                        $('#postCorrelati').append('<p>'+"Luogo: "+data[i].luogo+"\n</p>")
+                    }
+                    if(data[i].descrizione.length != 0){
+                        $('#postCorrelati').append('<p>'+"Descrizione: "+data[i].descrizione+"\n</p>")
+                    }
                     $('#postCorrelati').append('<br>');
                 }
             }
