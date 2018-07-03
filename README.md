@@ -38,7 +38,7 @@ $ node server.js
 ```
 In un altro terminale:
 ```
-$node processo.js
+$ node processo.js
 ```
 
 ## Come utilizzarlo
