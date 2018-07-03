@@ -20,20 +20,7 @@ module.exports = function(app,request,amqp,querystring,io){
 	app.get('/', function(req,res) {    
 		res.render('index');
 	});
-	
-	//DEBUG-------------------------------------------------------------
-	
-	app.get('/debug', function(req,res){
-		post.find({}, function (result, err) {                
-            if (err) return console.error(err);            
-            else console.log(result);
-        });
-        user.find({}, function (result, err) {                
-            if (err) return console.error(err);            
-            else console.log(result);
-        });
-	});
-	
+
 	//LOGIN------------------------------------------------------------
 	app.get('/login',function(req,res){
 		var urlfb = costanti.facebookAuth.urlFb;
@@ -161,6 +148,15 @@ module.exports = function(app,request,amqp,querystring,io){
 				})	
 			}	
 		})
+	});
+
+	//LOGOUT------------------------------------------------------------
+	app.post('/profilo/:id', function(req,res) {
+		user.update({ id: req.params.id }, { token: ''}, function(err, raw) {	//aggiorno info
+			if (err) return console.error(err);
+			console.log(raw);
+			res.redirect("/"); 											
+		});	
 	});
 
     //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
@@ -304,7 +300,6 @@ module.exports = function(app,request,amqp,querystring,io){
 			var conn=result.connected; 
 			post.find({ _id: { $in: conn} }, function(err, results) {	//aggiorno info post correlati (elimino questo post tra i loro correlati)
 				if (err) return console.error(err);
-				console.log("AOOOOOOOOOOOOOOOOOOOOOOO: "+results);
 				for (var i = 0; i <results.length; i++) {					//da recuperare post correllati
 					results[i].connected=remove(results[i].connected, req.params.id ); 
 					results[i].save();
@@ -320,15 +315,6 @@ module.exports = function(app,request,amqp,querystring,io){
 		});
 	});
 		
-	//LOGOUT------------------------------------------------------------
-	app.post('/profilo/:id', function(req,res) {
-		user.update({ id: req.params.id }, { token: ''}, function(err, raw) {	//aggiorno info
-			if (err) return console.error(err);
-			console.log(raw);
-			res.redirect("/"); 											
-		});	
-	});
-
 	app.get('/refresh/:utentiDaInformare',function(req,res){
 		var utenti = req.params.utentiDaInformare.split(";");
 		for (var i = 0; i < utenti.length; i++) {
