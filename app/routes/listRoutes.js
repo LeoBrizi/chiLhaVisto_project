@@ -16,7 +16,6 @@ module.exports = function(app,request,amqp,querystring,io){
 	}
 	
 	// PAGINA INIZIALE--------------------------------------------------
-	
 	app.get('/', function(req,res) {    
 		res.render('index');
 	});
@@ -46,7 +45,6 @@ module.exports = function(app,request,amqp,querystring,io){
   			if (err) {
    				return console.error('upload failed:', err);
   			}
-  			//console.log('Upload successful!  Server responded with:', body);
 			var info = JSON.parse(body);
 			if(info.error === 'access_denied' && info.error_reason === 'user_denied'){
 				res.redirect("/login");
@@ -55,13 +53,11 @@ module.exports = function(app,request,amqp,querystring,io){
 				access_token: info.access_token
 			}
 			token_u=info.access_token;
-			//console.log(queryString);
 			request.get({url: 'https://graph.facebook.com/v3.0/me?fields=id,name,email', qs:queryString},function optionalCallback(err, httpResponse, body){
 				if(err){
 					return console.error('upload failed:', err);
 				}
 				var info = JSON.parse(body);
-				//console.log(info);
 				//controllo se utente già nel db      		
 				user.find({id: info.id}, function (err, result) {					//cerchiamo l'utente nel db
 					if (err) return console.error(err);                     		//caso errore
@@ -133,7 +129,7 @@ module.exports = function(app,request,amqp,querystring,io){
 			}
 		}
     ]);
-	//PROFILO-----------------------------------------------------------MANCANO POST SIMILI
+	//PROFILO-----------------------------------------------------------
 
 	app.get('/profilo/:id',function(req,res){
 		var u_id=req.params.id;
@@ -159,7 +155,7 @@ module.exports = function(app,request,amqp,querystring,io){
 		});	
 	});
 
-    //NUOVO POST--------------------------------------------------------MANCA CONDIVISIONE FACEBOOK
+    //NUOVO POST--------------------------------------------------------
     app.get('/nuovo_post/:id', function (req, res){						//da passare id user così che quando fatta post ho id user
 		var u_id=req.params.id;
 		user.findOne({id: u_id}, function (err, result) {           
@@ -268,7 +264,7 @@ module.exports = function(app,request,amqp,querystring,io){
 							user.findOne({id: u_id}, function(err,result){ //devo cercare il token dell'utente
 								if (err) return console.error(err);
 								else{
-									var message="In data: "+info.data+", mi sono perso/a: "+info.sottoCategoria+
+									var message="In data: "+info.data+", ho smarrito "+info.sottoCategoria+
 										" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
 									var options = {												
 										url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
@@ -292,7 +288,7 @@ module.exports = function(app,request,amqp,querystring,io){
 		}
     ]);
     
-    //ELIMINAZIONE POST DA DB (per adesso qui):-------------------------
+    //ELIMINAZIONE POST DA DB:-------------------------
 	app.get('/delete_post/:id', function (req, res){
 		post.findOne({_id: req.params.id }, function (err,result) {     //ho bisogno dell'id utente (per reindirizzarlo poi sul profilo) e della lista dei post correlati          
             if (err) return console.error(err);            

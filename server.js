@@ -46,7 +46,7 @@ var server = app.listen(port,function(){
 
 var io = socket(server);
 
-routes(app,request,amqp,querystring,io); //passati app e passport per essere usati in routes
+routes(app,request,amqp,querystring,io); 
 
 const user= require('./app/models/listModels.js').Utente; 			//recuperiamo il modello degli utenti
 const post= require('./app/models/listModels.js').Post;			//recuperiamo il modello dei post

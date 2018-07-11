@@ -20,11 +20,6 @@ var PostSchema = new Schema({
   
   sottoCategoria: String,
   
-/*  immagine: {
-	  type: 
-  },
- */
-  
   data: {
     type: Date,
     default: Date.now

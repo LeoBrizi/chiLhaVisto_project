@@ -91,7 +91,6 @@ amqp.connect(configBroker.url, function(err,connection){
                 console.log(JSON.stringify(post));
                 //RICERCA POST--------------------------------
                 findCorr(post[0], 'Trovato', { $gte: StringToDate(post[0].data) });
-                //parte di ari ancora da implementare
             }, {noAck: true});
         });
 
@@ -103,7 +102,6 @@ amqp.connect(configBroker.url, function(err,connection){
                 console.log(JSON.stringify(post));
                 //RICERCA POST--------------------------------
                 findCorr(post[0], 'Perso', { $lte: StringToDate(post[0].data) });
-                //parte di ari ancora da implementare
             }, {noAck: true});
         });
     });
