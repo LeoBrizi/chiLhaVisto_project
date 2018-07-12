@@ -31,7 +31,7 @@
 
 * ### '/nuovo_post/:id'
     * **GET**: mostra la form per creare un nuovo post per un oggetto perduto o ritrovato
-    * **POST**: verifica se le informazioni inserite sono corrette (in caso contrario reindirizza la form), aggiunge nel database il post creato, inserisce nella coda di messaggi amqp le informazioni relative al nuovo post al fine di cercare post complementari ([vedi](https://github.com/LeoBrizi/chiLhaVisto_project/blob/master/readMeProcesso.md)) e se il post è relativo ad un oggetto perso condivide sul profilo dell’utente id uno stato 
+    * **POST**: verifica se le informazioni inserite sono corrette (in caso contrario reindirizza la form), aggiunge nel database il post creato, inserisce nella coda di messaggi amqp le informazioni relative al nuovo post al fine di cercare post complementari e se il post è relativo ad un oggetto perso condivide sul profilo dell’utente id uno stato 
     * PUT:
     * DELETE:
 
