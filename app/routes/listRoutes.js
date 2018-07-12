@@ -204,11 +204,8 @@ module.exports = function(app,request,amqp,querystring,io){
 						descrizione: req.body.descrizione,
 						ricompensa: req.body.ricompensa		
 					};
-					
 					if (info.data==null || info.data=='') delete info.data;
-					
 					if (info.tipoPost=='Trovato') delete info.ricompensa;
-					
 					if (!errors.isEmpty()) {
 					// Ci sono degli errori: restituiamo la form nuovamente con valori puliti dagli spazi-errori segnalati.
 						res.render('form', { tipoPostOpt: tipoPostOpt, catOpt: catOpt, info:info, errors: errors.array() });
@@ -218,69 +215,57 @@ module.exports = function(app,request,amqp,querystring,io){
 						//i dati sono validi
 						var u_id=req.params.id;  									//id utente che ha creato nuovo post
 						var p_id='';
-			
 						//POST INSERITO NEL DB------------------------------
 						info.user_id= u_id;
-						user.findOne({id: u_id}, function (err, result) {           //recupero email da database  
-							if (err) return console.error(err);            
+						info.user_em=result.email;
+						console.log(info)
+						var entry= new post(info);                          //creata la entry
+						entry.save(function (err) {                         //salvata la entry sul db
+							if (err) return console.error(err);             //caso errore
 							else {
-								info.user_em=result.email;
-								console.log(info)
-								var entry= new post(info);                          //creata la entry
-								entry.save(function (err) {                         //salvata la entry sul db
-									if (err) return console.error(err);             //caso errore
-									else {
-										console.log('inserito post nel db');
-										p_id=entry._id;
-										res.render('added', {id: u_id});
-									}
+								console.log('inserito post nel db');
+								p_id=entry._id;
+								res.render('added', {id: u_id});
+								//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
+								amqp.connect(configBroker.url, function(err,connection){
+									if (err) return console.error(err);
+									connection.createChannel(function(err,channel){
+										if (err) return console.error(err);
+										var exchange = configBroker.exchange_search;
+										var key = info.tipoPost;
+										var msg = [{
+											id: p_id,
+											user: u_id,
+											categoria :  info.categoria,
+											data : info.data,
+											citta : info.città
+										}];
+										channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
+										channel.publish(exchange,key, new Buffer(JSON.stringify(msg)));
+										console.log("	Post sent to queue %s", key);
+										console.log(JSON.parse(JSON.stringify(msg)));
+									});
 								});
 							}
 						});
-
-						//INSERIMENTO ENTRY IN CODA MESSAGGI PER RICERCA POST SIMILI
-						amqp.connect(configBroker.url, function(err,connection){
-							if (err) return console.error(err);
-							connection.createChannel(function(err,channel){
-								if (err) return console.error(err);
-								var exchange = configBroker.exchange_search;
-								var key = info.tipoPost;
-								var msg = [{
-									id: p_id,
-									user: u_id,
-									categoria :  info.categoria,
-									data : info.data,
-									citta : info.città
-								}];
-
-								channel.assertExchange(exchange,'topic', {durable:false});	//topic = tipo di exchange, durable false = la coda non sopravvive se il broker viene riavviato
-								channel.publish(exchange,key, new Buffer(JSON.stringify(msg)));
-								console.log("	Post sent to queue %s", key);
-								console.log(JSON.parse(JSON.stringify(msg)));
-							});
-						});
 						//condividi su facebook(chiamata REST)
 						if (info.tipoPost=='Perso'){
-							user.findOne({id: u_id}, function(err,result){ //devo cercare il token dell'utente
-								if (err) return console.error(err);
-								else{
-									var message="In data: "+info.data+", ho smarrito "+info.sottoCategoria+
-										" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
-									var options = {												
-										url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
-										method: 'POST',
-										headers: {
-											"Content-Type": "application/json"
-										},
-										json:true
-									};
-									request.post(options, function(error,response,body){
-										if (!error && response.statusCode == 200) {
-											console.log(body)
-										}						
-									});
-								}
-							})
+							 //devo cercare il token dell'utente
+							var message="In data: "+info.data+", ho smarrito "+info.sottoCategoria+
+								" in "+info.luogo+", a "+info.città+". Potete aiutarmi a ritrovarlo? Grazie.";
+							var options = {												
+								url: 'https://graph.facebook.com/v2.11/'+u_id+'/feed/?message='+message+'&access_token='+result.token,
+								method: 'POST',
+								headers: {
+									"Content-Type": "application/json"
+								},
+								json:true
+							};
+							request.post(options, function(error,response,body){
+								if (!error && response.statusCode == 200) {
+									console.log(body)
+								}						
+							});
 						}
 					}
 				}
